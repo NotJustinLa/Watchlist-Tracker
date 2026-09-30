@@ -17,6 +17,14 @@ export type MovieDetail = Movie & {
   overview: string;
 };
 
+export type MovieSnapshot = {
+  tmdbId: number;
+  title: string;
+  posterPath: string | null;
+  releaseYear: number | null;
+  genres: string[];
+};
+
 type TmdbMovie = {
   id: number;
   title: string;
@@ -76,18 +84,38 @@ export async function searchMovies(query: string): Promise<Movie[]> {
   return data.results.map((m) => toMovie(m));
 }
 
-export async function getMovie(id: number): Promise<MovieDetail | null> {
+async function fetchMovieDetail(id: number): Promise<TmdbMovieDetail | null> {
   try {
-    const m = await tmdbFetch<TmdbMovieDetail>(`/movie/${id}`);
-    return {
-      ...toMovie(m, 'w500'),
-      backdropUrl: imageUrl('w1280', m.backdrop_path),
-      runtime: m.runtime || null,
-      genres: m.genres.map((g) => g.name),
-      overview: m.overview,
-    };
+    return await tmdbFetch<TmdbMovieDetail>(`/movie/${id}`);
   } catch (error) {
     if (error instanceof TmdbError && error.status === 404) return null;
     throw error;
   }
+}
+
+export async function getMovie(id: number): Promise<MovieDetail | null> {
+  const m = await fetchMovieDetail(id);
+  if (!m) return null;
+  return {
+    ...toMovie(m, 'w500'),
+    backdropUrl: imageUrl('w1280', m.backdrop_path),
+    runtime: m.runtime || null,
+    genres: m.genres.map((g) => g.name),
+    overview: m.overview,
+  };
+}
+
+// What the `movies` table stores: built from TMDB on the server, never from client data.
+export async function getMovieSnapshot(
+  id: number,
+): Promise<MovieSnapshot | null> {
+  const m = await fetchMovieDetail(id);
+  if (!m) return null;
+  return {
+    tmdbId: m.id,
+    title: m.title,
+    posterPath: m.poster_path,
+    releaseYear: toMovie(m).year,
+    genres: m.genres.map((g) => g.name),
+  };
 }

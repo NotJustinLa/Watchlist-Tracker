@@ -32,3 +32,7 @@
 - Not-found films: Bad or unknown ids render the 404 page; because `loading.tsx` streams first, the HTTP status is 200 with a `noindex` tag (documented Next.js behaviour)
 - Error retry: `error.tsx` uses Next 16's `retry()` (re-fetches) instead of `reset()`
 - Background: A faint dot pattern (24px spacing) sits behind all content (surfaces and posters cover it); on hover-capable devices the dots glow yellow around the pointer, and the movie backdrop has letterbox bars. A deliberate exception to the design system's "no decoration" and "yellow only in four places" rules
+- Watching: A film is watched once it has a star rating; the movie page has no separate "Mark as watched" step
+- Rating and the watchlist: Rating a film removes it from the watchlist; a watched film can be added back to rewatch (rating it again removes it again)
+- Watchlist action: `setOnWatchlist(tmdbId, on)` takes the desired state instead of toggling, so a double tap or retry can't flip it the wrong way
+- Re-rating: Changing a rating keeps the original `watched_at`

@@ -2,7 +2,13 @@ import { z } from 'zod';
 
 export const searchQuerySchema = z.string().trim().max(100).catch('');
 
-export const tmdbIdSchema = z
+// Fits the Postgres `integer` column.
+export const tmdbIdSchema = z.number().int().min(1).max(999_999_999);
+
+export const tmdbIdParamSchema = z
   .string()
-  .regex(/^[1-9]\d{0,8}$/)
-  .transform(Number);
+  .regex(/^[1-9]\d*$/)
+  .transform(Number)
+  .pipe(tmdbIdSchema);
+
+export const ratingSchema = z.number().int().min(1).max(5);

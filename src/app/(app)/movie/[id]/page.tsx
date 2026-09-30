@@ -2,14 +2,34 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { BackButton } from '@/components/BackButton';
 import { Poster } from '@/components/PosterCard';
+import type { Rating } from '@/components/StarRating';
+import { createClient } from '@/lib/supabase/server';
 import { getMovie } from '@/lib/tmdb';
-import { tmdbIdSchema } from '@/lib/validation';
+import { tmdbIdParamSchema } from '@/lib/validation';
+import { MovieActions } from './MovieActions';
 
 export default async function MoviePage({ params }: PageProps<'/movie/[id]'>) {
-  const id = tmdbIdSchema.safeParse((await params).id);
+  const id = tmdbIdParamSchema.safeParse((await params).id);
   if (!id.success) notFound();
-  const movie = await getMovie(id.data);
+
+  // RLS limits both queries to the signed-in user's own rows.
+  const supabase = await createClient();
+  const [movie, watched, watchlisted] = await Promise.all([
+    getMovie(id.data),
+    supabase
+      .from('watched')
+      .select('rating')
+      .eq('tmdb_id', id.data)
+      .maybeSingle(),
+    supabase
+      .from('watchlist_items')
+      .select('tmdb_id')
+      .eq('tmdb_id', id.data)
+      .maybeSingle(),
+  ]);
   if (!movie) notFound();
+  if (watched.error) throw watched.error;
+  if (watchlisted.error) throw watchlisted.error;
 
   const meta = [movie.year, movie.runtime && `${movie.runtime} min`]
     .filter(Boolean)
@@ -63,7 +83,14 @@ export default async function MoviePage({ params }: PageProps<'/movie/[id]'>) {
         </div>
       </div>
 
-      <div className="mx-auto max-w-content px-4 pt-6 md:px-8 md:pt-8">
+      <div className="mx-auto flex max-w-content flex-col gap-6 px-4 pt-6 md:grid md:grid-cols-[1.4fr_1fr] md:items-start md:gap-8 md:px-8 md:pt-8">
+        <div className="md:order-2">
+          <MovieActions
+            tmdbId={movie.id}
+            rating={(watched.data?.rating ?? 0) as Rating}
+            onWatchlist={watchlisted.data !== null}
+          />
+        </div>
         <section className="flex max-w-prose flex-col gap-3">
           <h2 className="text-overline text-muted uppercase">Overview</h2>
           <p>{movie.overview || 'No overview available.'}</p>
