@@ -2,20 +2,22 @@
 
 Movie watchlist and rating tracker with AI taste profiles and a social feed. Built with Next.js, Supabase and TMDB.
 
-## Decisions
+# Decisions
 
-| Area                 | Decision                                                                                                                                                                                                                          |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Stack                | Next.js (App Router) + TypeScript + Tailwind, deployed on Vercel                                                                                                                                                                  |
-| Auth                 | Supabase Auth, OAuth only (Google, GitHub, Discord). No email/password                                                                                                                                                            |
-| Database             | Supabase Postgres with Row Level Security on every table                                                                                                                                                                          |
-| Keys                 | Every user-owned row keys on `auth.users.id` (UUID). Never email, never handle                                                                                                                                                    |
-| Movies               | Movies only, via TMDB v4 bearer token, called server-side only                                                                                                                                                                    |
-| Ratings              | 1–5 whole stars. A film is "watched" once it has a rating                                                                                                                                                                         |
-| AI                   | Gemini, server-side only, structured JSON output validated before use                                                                                                                                                             |
-| Handles              | Auto-generated from OAuth name, numeric suffix on collision, editable in settings                                                                                                                                                 |
-| Privacy              | Public or private profile. Following a private account creates a request that must be approved                                                                                                                                    |
-| Visible to followers | Watched films, ratings, stats and watchlist (subject to privacy)                                                                                                                                                                  |
-| Feed                 | "Watched + rated" and "added to watchlist" events from accepted follows                                                                                                                                                           |
-| ID rule              | Another member's UUID never reaches the browser. Social data is shaped server-side and exposes handles only                                                                                                                       |
-| Movie snapshot       | A minimal `movies` row (title, poster, year, genres) is stored when a user first saves a film, so feeds, profiles and the AI prompt don't need one TMDB call per film. This is a snapshot for display, not a TMDB cache or mirror |
+- Stack: Next.js App Router, TypeScript, Tailwind, Vercel
+- Auth: Supabase OAuth only — Google, GitHub, Discord
+- Database: Supabase Postgres with RLS on every table
+- User IDs: Use auth.users.id UUIDs, never emails or handles
+- Movies: TMDB, server-side requests only
+- Ratings: 1–5 whole stars; rating a movie marks it as watched
+- AI: Gemini, server-side, validated structured JSON
+- Handles: Auto-generated from OAuth name, collision suffix if needed, editable later
+- Privacy: Public/private profiles; private follows require approval
+- Follower visibility: Watched movies, ratings, stats, and watchlist
+- Feed: Watched/rated and watchlist activity from accepted follows
+- UUID privacy: Other users' UUIDs never reach the client
+- Movie snapshots: Store basic movie metadata locally for display and AI prompts, rather than repeatedly calling TMDB
+- Design tokens: The design system's names (`line`, `line-strong`, `ink`, `on-accent`, ...); Tailwind's default palette is removed
+- Routes: Search is the home page (`/`); profiles live at `/u/<handle>`
+- Font: Manrope, loaded with `next/font`
+- Missing posters: A film icon on a raised 2:3 block

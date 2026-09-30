@@ -1,26 +1,74 @@
 @import 'tailwindcss';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  --color-*: initial;
+  --color-bg: #0b0b0f;
+  --color-surface: #16161d;
+  --color-raised: #1f1f28;
+  --color-line: #2a2a35;
+  --color-line-strong: #6b6b7a;
+  --color-ink: #ededf0;
+  --color-muted: #9a9aa8;
+  --color-accent: #f5c518;
+  --color-on-accent: #0b0b0f;
+  --color-positive: #5bd08a;
+  --color-negative: #ff7a6b;
+  --color-scrim: rgb(11 11 15 / 0.78);
+  --color-badge: #ededf0;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --text-display: 34px;
+  --text-display--line-height: 38px;
+  --text-display--font-weight: 800;
+  --text-display--letter-spacing: -0.02em;
+  --text-title-lg: 24px;
+  --text-title-lg--line-height: 30px;
+  --text-title-lg--font-weight: 800;
+  --text-title-lg--letter-spacing: -0.01em;
+  --text-title: 18px;
+  --text-title--line-height: 24px;
+  --text-title--font-weight: 700;
+  --text-body: 15px;
+  --text-body--line-height: 22px;
+  --text-body--font-weight: 500;
+  --text-label: 14px;
+  --text-label--line-height: 20px;
+  --text-label--font-weight: 700;
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 18px;
+  --text-body-sm--font-weight: 500;
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+  --text-caption--font-weight: 600;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 22px;
+
+  --shadow-poster: 0 10px 28px rgb(0 0 0 / 0.5);
+  --shadow-nav: 0 -1px 0 #2a2a35, 0 -12px 32px rgb(0 0 0 / 0.6);
+
+  --container-content: 1200px;
+
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+
+  --animate-skeleton: skeleton 1400ms ease-in-out infinite;
+  @keyframes skeleton {
+    50% {
+      opacity: 0.45;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  body {
+    @apply bg-bg text-body text-ink antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
 }
