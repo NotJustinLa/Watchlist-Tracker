@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Activity, Bookmark, Search, Sparkles, User } from 'lucide-react';
+import { SignOutButton } from './SignOutButton';
 
 type NavId = 'search' | 'feed' | 'watchlist' | 'taste' | 'profile';
 
@@ -56,6 +57,9 @@ export function AppNav({ profileHref }: { profileHref: string }) {
         <nav aria-label="Main" className="flex gap-1">
           {links('h-10 gap-2 rounded-md px-3 text-label text-muted', 20)}
         </nav>
+        <div className="ml-auto">
+          <SignOutButton iconOnly />
+        </div>
       </header>
       <nav
         aria-label="Main"

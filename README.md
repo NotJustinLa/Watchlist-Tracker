@@ -21,3 +21,7 @@ Movie watchlist and rating tracker with AI taste profiles and a social feed. Bui
 - Routes: Search is the home page (`/`); profiles live at `/u/<handle>`
 - Font: Manrope, loaded with `next/font`
 - Missing posters: A film icon on a raised 2:3 block
+- Proxy: Session refresh and sign-in redirects live in `src/proxy.ts`, Next 16's replacement for `middleware.ts`
+- Sign-in: Official Google (full colour), GitHub and Discord (single colour) logos; the design's poster wall is added once TMDB is wired up
+- Sign out: Icon in the desktop top bar and a button on the placeholder profile page, until Settings exists
+- Supabase browser client: Not created until a client component needs it; sign-in runs as a server action
