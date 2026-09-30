@@ -36,3 +36,5 @@
 - Rating and the watchlist: Rating a film removes it from the watchlist; a watched film can be added back to rewatch (rating it again removes it again)
 - Watchlist action: `setOnWatchlist(tmdbId, on)` takes the desired state instead of toggling, so a double tap or retry can't flip it the wrong way
 - Re-rating: Changing a rating keeps the original `watched_at`
+- List pages: Watchlist and Watched read the stored `movies` snapshots (no TMDB calls); sort and star filter live in the URL (`?sort=`, `?stars=`) and invalid values fall back to defaults
+- Watched page: Reached from the Profile tab (a link on the placeholder profile until the real profile exists)

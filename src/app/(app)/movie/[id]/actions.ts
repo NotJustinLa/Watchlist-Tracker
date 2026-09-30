@@ -40,7 +40,7 @@ export async function setOnWatchlist(tmdbId: number, onWatchlist: boolean) {
       .eq('tmdb_id', id);
     if (error) throw error;
   }
-  revalidatePath(`/movie/${id}`);
+  revalidatePath('/', 'layout');
 }
 
 // Rating marks the film watched and takes it off the watchlist.
@@ -62,7 +62,7 @@ export async function rateMovie(tmdbId: number, rating: number) {
     .eq('user_id', user.id)
     .eq('tmdb_id', id);
   if (watchlistError) throw watchlistError;
-  revalidatePath(`/movie/${id}`);
+  revalidatePath('/', 'layout');
 }
 
 export async function removeRating(tmdbId: number) {
@@ -75,5 +75,5 @@ export async function removeRating(tmdbId: number) {
     .eq('user_id', user.id)
     .eq('tmdb_id', id);
   if (error) throw error;
-  revalidatePath(`/movie/${id}`);
+  revalidatePath('/', 'layout');
 }

@@ -12,3 +12,15 @@ export const tmdbIdParamSchema = z
   .pipe(tmdbIdSchema);
 
 export const ratingSchema = z.number().int().min(1).max(5);
+
+export const watchlistSortSchema = z.enum(['added', 'title']).catch('added');
+
+export const watchedSortSchema = z
+  .enum(['recent', 'rating', 'title'])
+  .catch('recent');
+
+export const starFilterSchema = z.coerce
+  .number()
+  .pipe(ratingSchema)
+  .optional()
+  .catch(undefined);

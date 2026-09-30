@@ -62,6 +62,9 @@ async function tmdbFetch<T>(
 const imageUrl = (size: string, path: string | null) =>
   path ? `${IMAGE_URL}/${size}${path}` : null;
 
+/** Grid-size poster URL for a stored `movies.poster_path`. */
+export const posterUrl = (path: string | null) => imageUrl('w342', path);
+
 function toMovie(m: TmdbMovie, posterSize = 'w342'): Movie {
   return {
     id: m.id,
