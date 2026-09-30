@@ -25,3 +25,5 @@ Movie watchlist and rating tracker with AI taste profiles and a social feed. Bui
 - Sign-in: Official Google (full colour), GitHub and Discord (single colour) logos; the design's poster wall is added once TMDB is wired up
 - Sign out: Icon in the desktop top bar and a button on the placeholder profile page, until Settings exists
 - Supabase browser client: Not created until a client component needs it; sign-in runs as a server action
+- Movie snapshot writes: Signed-in users can only read `movies`; the server writes snapshots with the Supabase service-role key so clients can't plant fake titles
+- Profile edits: Column grants limit client updates to `handle` and `is_private`
