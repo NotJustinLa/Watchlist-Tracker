@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Manrope } from 'next/font/google';
+import { PointerGlow } from '@/components/PointerGlow';
 import './globals.css';
 
 const manrope = Manrope({
@@ -16,7 +17,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" className={`${manrope.variable} h-full`}>
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        <PointerGlow />
+        {children}
+      </body>
     </html>
   );
 }

@@ -1,6 +1,6 @@
 # Watchlist-Tracker
 
-Movie watchlist and rating tracker with AI taste profiles and a social feed. Built with Next.js, Supabase and TMDB.
+`Movie watchlist and rating tracker with AI taste profiles and a social feed. Built with Next.js, Supabase and TMDB.`
 
 # Decisions
 
@@ -27,3 +27,8 @@ Movie watchlist and rating tracker with AI taste profiles and a social feed. Bui
 - Supabase browser client: Not created until a client component needs it; sign-in runs as a server action
 - Movie snapshot writes: Signed-in users can only read `movies`; the server writes snapshots with the Supabase service-role key so clients can't plant fake titles
 - Profile edits: Column grants limit client updates to `handle` and `is_private`
+- Page layout: Standard pages share a padded, centred container via the `(app)/(contained)` route group; the movie page sits outside it so its backdrop can run full width
+- TMDB caching: TMDB responses are cached for an hour; images use TMDB sizes (`w342` grids, `w500` detail poster, `w1280` backdrop)
+- Not-found films: Bad or unknown ids render the 404 page; because `loading.tsx` streams first, the HTTP status is 200 with a `noindex` tag (documented Next.js behaviour)
+- Error retry: `error.tsx` uses Next 16's `retry()` (re-fetches) instead of `reset()`
+- Background: A faint dot pattern (24px spacing) sits behind all content (surfaces and posters cover it); on hover-capable devices the dots glow yellow around the pointer, and the movie backdrop has letterbox bars. A deliberate exception to the design system's "no decoration" and "yellow only in four places" rules

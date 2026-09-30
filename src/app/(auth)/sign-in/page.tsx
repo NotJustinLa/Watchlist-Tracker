@@ -5,6 +5,8 @@ import {
   GitHubLogo,
   GoogleLogo,
 } from '@/components/ProviderLogos';
+import { Poster } from '@/components/PosterCard';
+import { getPopular } from '@/lib/tmdb';
 import { signIn } from '../actions';
 
 const providers = [
@@ -17,10 +19,24 @@ export default async function SignInPage({
   searchParams,
 }: PageProps<'/sign-in'>) {
   const { error } = await searchParams;
+  // The poster wall is decoration: if TMDB is down, sign-in still works.
+  const wall = await getPopular().catch(() => []);
 
   return (
-    <main className="flex min-h-dvh flex-col justify-end px-4 pt-6 pb-8 md:justify-center">
-      <div className="mx-auto flex w-full max-w-100 flex-col gap-6">
+    <main className="relative flex min-h-dvh flex-col justify-end overflow-hidden px-4 pt-6 pb-8 md:justify-center">
+      <div
+        aria-hidden
+        className="absolute inset-x-[-40px] top-[-40px] grid -rotate-8 grid-cols-4 gap-2.5 opacity-50 md:grid-cols-8 after:absolute after:inset-0 after:bg-linear-to-b after:from-bg/10 after:to-bg after:to-88%"
+      >
+        {wall.slice(0, 16).map((movie) => (
+          <Poster
+            key={movie.id}
+            url={movie.posterUrl}
+            sizes="(min-width: 768px) 13vw, 26vw"
+          />
+        ))}
+      </div>
+      <div className="relative mx-auto flex w-full max-w-100 flex-col gap-6">
         <div>
           <h1 className="text-[44px] leading-none font-extrabold tracking-[-0.03em]">
             Reel<span className="text-accent">.</span>

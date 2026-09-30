@@ -14,6 +14,7 @@
   --color-positive: #5bd08a;
   --color-negative: #ff7a6b;
   --color-scrim: rgb(11 11 15 / 0.78);
+  --color-scrim-soft: rgb(11 11 15 / 0.55);
   --color-badge: #ededf0;
 
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
@@ -41,6 +42,10 @@
   --text-caption: 12px;
   --text-caption--line-height: 16px;
   --text-caption--font-weight: 600;
+  --text-overline: 11px;
+  --text-overline--line-height: 14px;
+  --text-overline--font-weight: 800;
+  --text-overline--letter-spacing: 0.08em;
 
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -66,6 +71,43 @@
 @layer base {
   body {
     @apply bg-bg text-body text-ink antialiased;
+  }
+
+  /* Dot pattern behind all content; surfaces and posters sit above it.
+     ::after is the same dots in accent, revealed around the pointer (set by PointerGlow). */
+  body::before,
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: radial-gradient(
+      circle,
+      var(--dot) 1px,
+      transparent 1.5px
+    );
+    background-size: 24px 24px;
+  }
+
+  body::before {
+    --dot: color-mix(in srgb, var(--color-ink) 12%, transparent);
+  }
+
+  body::after {
+    --dot: var(--color-accent);
+    opacity: 1;
+    mask-image: radial-gradient(
+      180px circle at var(--pointer-x, -999px) var(--pointer-y, -999px),
+      black,
+      transparent
+    );
+  }
+
+  @media (hover: none) {
+    body::after {
+      display: none;
+    }
   }
 
   :focus-visible {

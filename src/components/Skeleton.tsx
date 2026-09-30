@@ -1,10 +1,23 @@
 import { PosterGrid } from './PosterGrid';
 
-export function Skeleton({ className = '' }: { className?: string }) {
+const radii = {
+  none: 'rounded-none',
+  sm: 'rounded-sm',
+  md: 'rounded-md',
+  lg: 'rounded-lg',
+  full: 'rounded-full',
+};
+
+type SkeletonProps = {
+  className?: string;
+  rounded?: keyof typeof radii;
+};
+
+export function Skeleton({ className = '', rounded = 'sm' }: SkeletonProps) {
   return (
     <div
       aria-hidden
-      className={`rounded-sm bg-raised motion-safe:animate-skeleton ${className}`}
+      className={`bg-raised motion-safe:animate-skeleton ${radii[rounded]} ${className}`}
     />
   );
 }
@@ -17,7 +30,7 @@ export function PosterGridSkeleton({ count = 12 }: { count?: number }) {
       <PosterGrid>
         {Array.from({ length: count }, (_, i) => (
           <div key={i} className="flex flex-col gap-2">
-            <Skeleton className="aspect-2/3 rounded-lg" />
+            <Skeleton rounded="lg" className="aspect-2/3" />
             <Skeleton
               className={`h-3.5 ${titleWidths[i % titleWidths.length]}`}
             />
