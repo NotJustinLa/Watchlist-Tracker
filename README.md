@@ -2,7 +2,7 @@
 
 A movie watchlist and rating tracker with an AI taste profile. Search films, save them to a watchlist, mark what you've watched and rate it, and get a short read on your taste with recommendations grounded in real films.
 
-Built with Next.js (App Router), TypeScript, Tailwind, Supabase (Auth, Postgres, RLS), TMDB and Gemini. Deployed on Vercel.
+Built with Next.js (App Router), TypeScript, Tailwind, Motion, Supabase (Auth, Postgres, RLS), TMDB and Gemini. Deployed on Vercel.
 
 ## Features
 
@@ -12,6 +12,7 @@ Built with Next.js (App Router), TypeScript, Tailwind, Supabase (Auth, Postgres,
 - **Follow requests**: private accounts approve or decline followers on the Requests page; a badge on the Profile tab shows how many are waiting.
 - **Search** TMDB as you type, or browse "Popular right now". Posters show your rating and watchlist status.
 - **Movie pages** with backdrop, poster, runtime, genres and overview, plus **Add to watchlist** and **Mark as watched**.
+- **Reels**: a Hinge-style swipe deck of recommended films. Swipe right (or tap the bookmark, or press →) to add a film to your watchlist, left (✕ or ←) to skip.
 - **Watchlist** sorted by date added or title, with remove on each poster.
 - **Watched** list (its own tab) where you rate each film with 1–5 stars under its poster. Sort by recent, rating or title; filter by star count or show only unrated films.
 - **Taste profile**: once you've rated 5 films, Gemini writes a one-to-two sentence summary of your taste and recommends 3–5 films you haven't seen, each with a reason that names a film you rated.
@@ -94,7 +95,7 @@ supabase/migrations/             Schema, RLS and the profile trigger
 - Watching and rating are separate steps: **Mark as watched** on a film's page adds it to Watched, and you rate it from the Watched page. A rating is optional, and only rated films count towards the taste profile.
 - Marking a film watched removes it from the watchlist; a watched film can be added back to rewatch. Unmarking a film removes it from Watched along with its rating.
 - Changing or clearing a rating keeps the original `watched_at`.
-- Search is the home page (`/`). The nav has six tabs: Search, Feed, Watchlist, Watched, Taste, Profile.
+- Search is the home page (`/`). The nav has seven tabs: Search, Reels, Feed, Watchlist, Watched, Taste, Profile.
 
 **Data**
 - A minimal `movies` snapshot (title, poster path, year, genres) is stored when a user first saves or rates a film, so lists and the AI prompt don't need a TMDB call per film. It is a display snapshot, not a TMDB mirror.
@@ -112,6 +113,11 @@ supabase/migrations/             Schema, RLS and the profile trigger
 - Gemini returns JSON against a response schema derived from the same zod schema that validates it. Transient errors (such as 503 "high demand") are retried up to 3 times within a 30-second timeout.
 - Each recommendation is matched to TMDB by title and year (±1). Picks that don't match, repeat, or are already watched are dropped; picks you watch later are hidden.
 - The loading state is a plain "Thinking about your ratings…" with skeletons rather than the design's timed step animation, so the UI never implies progress it can't measure.
+
+**Reels**
+- One card at a time, Hinge-style (no vertical scrolling): drag past 110px or flick to decide; otherwise the card springs back. The card tilts with the drag and a Save / Skip stamp fades in. Animation uses Motion (`motion/react`, the renamed Framer Motion) and respects reduced-motion settings.
+- Films: your AI taste picks first (with their AI reasons), then TMDB recommendations for the films you rated 4–5 stars, cycling through them ("Because you loved Past Lives"); trending films if you haven't rated any that highly. Watched and saved films are excluded. Batches load from `GET /api/reels?page=` as you near the end.
+- Skips last for the visit only: skipped and already-shown films don't come back until you reload.
 
 **Interface**
 - Design tokens use the design system's names (`bg`, `surface`, `raised`, `line`, `ink`, `muted`, `accent`, ...); Tailwind's default palette is removed so only tokens can be used.

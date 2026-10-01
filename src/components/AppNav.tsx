@@ -2,14 +2,24 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Activity, Bookmark, Eye, Search, Sparkles, User } from 'lucide-react';
+import {
+  Activity,
+  Bookmark,
+  Clapperboard,
+  Eye,
+  Search,
+  Sparkles,
+  User,
+} from 'lucide-react';
 import { SignOutButton } from './SignOutButton';
 
-type NavId = 'search' | 'feed' | 'watchlist' | 'watched' | 'taste' | 'profile';
+type NavId =
+  'search' | 'reels' | 'feed' | 'watchlist' | 'watched' | 'taste' | 'profile';
 
 function activeTab(pathname: string): NavId {
   if (pathname.startsWith('/feed') || pathname.startsWith('/discover'))
     return 'feed';
+  if (pathname.startsWith('/reels')) return 'reels';
   if (pathname.startsWith('/watchlist')) return 'watchlist';
   if (pathname.startsWith('/watched')) return 'watched';
   if (pathname.startsWith('/taste')) return 'taste';
@@ -30,6 +40,7 @@ export function AppNav({
   const active = activeTab(usePathname());
   const items = [
     { id: 'search', label: 'Search', href: '/', icon: Search },
+    { id: 'reels', label: 'Reels', href: '/reels', icon: Clapperboard },
     { id: 'feed', label: 'Feed', href: '/feed', icon: Activity },
     { id: 'watchlist', label: 'Watchlist', href: '/watchlist', icon: Bookmark },
     { id: 'watched', label: 'Watched', href: '/watched', icon: Eye },

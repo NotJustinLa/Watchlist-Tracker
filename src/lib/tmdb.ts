@@ -10,6 +10,9 @@ export type Movie = {
   posterUrl: string | null;
 };
 
+/** A film as shown on a Reels card. */
+export type ReelFilm = Movie & { genres: string[]; overview: string };
+
 type MovieDetail = Movie & {
   backdropUrl: string | null;
   runtime: number | null;
@@ -30,6 +33,12 @@ type TmdbMovie = {
   title: string;
   release_date?: string;
   poster_path: string | null;
+};
+
+type TmdbListMovie = TmdbMovie & {
+  overview: string;
+  genre_ids: number[];
+  adult?: boolean;
 };
 
 type TmdbMovieDetail = TmdbMovie & {
@@ -121,4 +130,39 @@ export async function getMovieSnapshot(
     releaseYear: toMovie(m).year,
     genres: m.genres.map((g) => g.name),
   };
+}
+
+async function genreNames(): Promise<Map<number, string>> {
+  const data = await tmdbFetch<{ genres: { id: number; name: string }[] }>(
+    '/genre/movie/list',
+  );
+  return new Map(data.genres.map((g) => [g.id, g.name]));
+}
+
+async function toReelFilms(results: TmdbListMovie[]): Promise<ReelFilm[]> {
+  const names = await genreNames();
+  return results
+    .filter((m) => !m.adult)
+    .map((m) => ({
+      ...toMovie(m, 'w500'),
+      overview: m.overview,
+      genres: m.genre_ids.flatMap((id) => names.get(id) ?? []),
+    }));
+}
+
+/** TMDB's "if you liked this" list for a film. */
+export async function getRecommendations(id: number, page: number) {
+  const data = await tmdbFetch<{ results: TmdbListMovie[] }>(
+    `/movie/${id}/recommendations`,
+    { page: String(page) },
+  );
+  return toReelFilms(data.results);
+}
+
+export async function getTrending(page: number) {
+  const data = await tmdbFetch<{ results: TmdbListMovie[] }>(
+    '/trending/movie/week',
+    { page: String(page) },
+  );
+  return toReelFilms(data.results);
 }
