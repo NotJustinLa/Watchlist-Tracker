@@ -118,57 +118,91 @@ supabase/migrations/             Schema, RLS and the profile trigger
 
 ## Decisions
 
-**Product**
+These are the choices made while building Reel, and the reasons behind them. Each point says what it means when you use the app first; the names in brackets at the end show where it lives in the code, if you want to look.
 
-- Movies only, via TMDB. Ratings are 1–5 whole stars.
-- Watching and rating are separate steps: **Mark as watched** on a film's page adds it to Watched, and you rate it from the Watched page. A rating is optional, and only rated films count towards the taste profile.
-- Marking a film watched removes it from the watchlist; a watched film can be added back to rewatch. Unmarking a film removes it from Watched along with its rating.
-- Changing or clearing a rating keeps the original `watched_at`.
-- Search is the home page (`/`). The nav has seven tabs: Search, Reels, Feed, Watchlist, Watched, Taste, Profile.
+### A few words you'll see
 
-**Data**
+- **TMDB**: The Movie Database, the free online catalogue Reel gets every film, poster and description from.
+- **Supabase**: the service that handles sign-in and stores Reel's data (your ratings, watchlist, follows).
+- **Handle**: your public username, like `@maya`.
+- **RLS (row-level security)**: a rule inside the database that only lets you read and change your own rows, even if someone tries to ask for more.
+- **Server action** and **API route**: code that runs on Reel's server (not in your browser) when you press a button or a page needs data.
 
-- A minimal `movies` snapshot (title, poster path, year, genres) is stored when a user first saves or rates a film, so lists and the AI prompt don't need a TMDB call per film. It is a display snapshot, not a TMDB mirror.
-- Profiles are created by a database trigger on sign-up. Handles are slugified from the OAuth name (fallback `user`), up to 16 characters, with a numeric suffix on collision.
-- Handles can be changed in Settings. Availability is checked by `GET /api/handles/check?h=` through a `handle_available()` database function that only answers yes or no, because RLS hides other members' profiles. The unique constraint is the final guard: a save that loses a race gets "That handle is taken". Old `/u/<handle>` links 404 after a rename, and nothing else changes because everything keys on the user id.
-- "Friends who watched" comes from `friends_who_watched(tmdb_ids)`, which returns handle, name, avatar and rating for accepted follows only, for at most 60 films per call; each grid makes one call (longer lists are split into batches of 60). The avatar stack sits in the poster's top-left corner, not the design's bottom-right, so it can't collide with your star rating on narrow phone posters.
-- The feed comes from `get_feed(before, page_size)`, which combines your accepted follows' `watched` and `watchlist_items` rows (no separate events table, so it can't drift out of sync). Unmarking a watched film or removing it from a watchlist removes the event; changing a rating updates the stars but keeps the original time. Pages of 20 use the last event's time as the cursor (`GET /api/feed?before=`). Pending follow requests show nothing.
-- Profiles come from `get_profile`, `get_member_watched` and `get_member_watchlist`, security-definer functions that take a handle and never return user ids. Stats and films are returned only if `can_view()` passes, so a private profile's films never reach the browser of someone who isn't approved. Your own profile uses the same functions. The average counts rated films only; "watched" counts every watched film. Rating bars are grey with the tallest in white (data, not a rating, so no yellow). Other members' profiles highlight the Feed tab, since you reach them from Discover.
-- Member search (`/discover?q=`) works like film search: the query lives in the URL and the server renders results. A `search_members()` database function returns handle, name, avatar, privacy and your relationship to each match (no ids), matching handle or name case-insensitively with LIKE wildcards escaped. Unfollowing a private account asks to confirm inline, since re-following needs approval again.
-- Follows are a `follows` table with a `pending`/`accepted` status. Following a public account is accepted at once; a private one creates a request. Switching from private to public accepts everyone waiting (a database trigger). Users can read only follow rows they're part of and can't write the table directly: `follow_by_handle`, `unfollow_by_handle`, `respond_to_request` and `get_follow_requests` are security-definer functions that act as the signed-in user, take handles, and never return ids. `can_view(target)` decides who can see a member's films and stats.
-- Server actions return `{ error }` for problems the caller can fix (invalid input, an unknown film or handle, rating an unwatched film, following yourself) instead of throwing, so malformed calls get a clear message rather than a 500; genuine server failures still throw. Route handlers return 400 for invalid input and 401 when signed out.
-- `setOnWatchlist(tmdbId, on)` and `setWatched(tmdbId, on)` take the desired state rather than toggling, so a double tap or retry can't flip it the wrong way. `rateMovie(tmdbId, rating | null)` only updates a film already marked watched.
-- List sorts and filters live in the URL (`?sort=`, `?stars=1..5|unrated`); invalid values fall back to defaults. Sorting by rating puts unrated films last.
-- TMDB responses are cached for an hour. Images use TMDB sizes: `w342` in grids, `w500` for the detail poster, `w1280` for backdrops.
+### Films, watching and rating
 
-**AI taste profile**
+- **Reel is for movies only**, and every film comes from TMDB. Ratings are whole stars from 1 to 5.
+- **Watching and rating are two separate steps.** On a film's page you press **Mark as watched**; later, on your **Watched** page, you give it stars. Rating is optional. Only rated films count towards your AI taste profile, because an unrated film doesn't say whether you liked it.
+- **Marking a film watched takes it off your watchlist**, since you've now seen it. You can add it back if you want to watch it again. Un-marking a film removes it from Watched and clears its rating.
+- **Changing your rating doesn't change the date you watched it**, so your history stays accurate.
+- **Search is the home page**, and the navigation has seven tabs: Search, Reels, Feed, Watchlist, Watched, Taste and Profile.
+- **Sorts and filters are part of the page address** (for example `/watched?sort=rating`). That means refreshing or sharing the link keeps your view. Anything invalid in the address is quietly ignored. When sorting by rating, unrated films go last.
 
-- Generated only on request (`POST /api/taste`), stored in `taste_profiles` with the rating count it used, and shown from storage afterwards. The page notes when you've rated more films since.
-- Needs at least 5 rated films (watched-but-unrated films don't count). Regenerating is limited to once a minute per user to protect the API key.
-- Gemini returns JSON against a response schema derived from the same zod schema that validates it. Transient errors (such as 503 "high demand") are retried up to 3 times within a 30-second timeout.
-- Each recommendation is matched to TMDB by title and year (±1). Picks that don't match, repeat, or are already watched are dropped; picks you watch later are hidden.
-- The loading state is a plain "Thinking about your ratings…" with skeletons rather than the design's timed step animation, so the UI never implies progress it can't measure.
+### Saving copies of films
 
-**Reels**
+- **When you first save or watch a film, Reel keeps a small copy of it**: title, poster, year and genres. Your lists, your friends' activity and the AI prompt read from these copies, so Reel doesn't have to ask TMDB about every film every time. It's only what's needed for display, not a full copy of TMDB. (`movies` table)
+- **Those copies are always made on the server from TMDB's own data**, never from what your browser sends, so nobody can sneak in a fake title or poster. Regular users can only read them; only the server can write them. (`saveMovieSnapshot` in `movie/[id]/actions.ts`, using the admin client)
+- **TMDB answers are remembered for an hour** to keep pages fast, and posters are loaded at sensible sizes: smaller in grids, larger on a film's page. (`src/lib/tmdb.ts`)
 
-- One card at a time, (no vertical scrolling): drag past 110px or flick to decide; otherwise the card springs back. The card tilts with the drag and a Save / Skip stamp fades in. Animation uses Motion (`motion/react`, the renamed Framer Motion) and respects reduced-motion settings.
-- Films: your AI taste picks first (with their AI reasons), then TMDB recommendations for the films you rated 4–5 stars, cycling through them ("Because you loved Past Lives"); trending films if you haven't rated any that highly. Watched and saved films are excluded. Batches load from `GET /api/reels?page=` as you near the end.
-- Skips last for the visit only: skipped and already-shown films don't come back until you reload.
+### Your profile and handle
 
-**Interface**
+- **Your profile is created automatically the first time you sign in.** Your handle is made from your name (for example "Justin La" becomes `justin_la`), shortened if needed, with a number added if it's already taken. (a database trigger in the first migration)
+- **You can change your handle in Settings.** As you type, Reel tells you if it's free. That check only ever answers yes or no and never reveals who owns a handle. If someone grabs the same handle a split second before you save, the database refuses the duplicate and you're told it's taken. (`/api/handles/check`, `handle_available()`)
+- **Changing your handle keeps everything else**: your ratings, lists and followers stay, because Reel connects them to your account, not your handle. Old links to your previous handle stop working.
+- **Profile stats count fairly.** "Watched" counts every film you've marked watched; the average rating only uses films you've actually rated. The rating chart is grey and white, not yellow, because it's information rather than a rating you're giving.
 
-- Design tokens use the design system's names (`bg`, `surface`, `raised`, `line`, `ink`, `muted`, `accent`, ...); Tailwind's default palette is removed so only tokens can be used.
-- Manrope via `next/font`. Lucide icons only, no emoji; the sign-in buttons use the official Google (full colour), GitHub and Discord marks.
-- Mutations use optimistic UI (`useOptimistic`): the change shows instantly and reverts with an inline message if the server rejects it.
-- Standard pages share a centred container via the `(app)/(contained)` route group; the movie page sits outside it so its backdrop runs full width.
-- A faint dot pattern sits behind all content and glows yellow around the pointer on hover-capable devices, and the movie backdrop has letterbox bars. This is a deliberate exception to the design system's "no decoration" and "yellow only for controls, stars and the active tab" rules.
-- Films without a poster show a film icon on a raised 2:3 block.
-- Sign out lives in Settings, with a shortcut icon in the desktop top bar.
+### Following people and privacy
 
-**Next.js 16**
+- **Profiles are public or private.** Following a public account works straight away. Following a private account sends a request that they have to approve. If a private account switches to public, everyone waiting is approved automatically. (`follows` table)
+- **What followers can see:** your films, ratings, stats and watchlist. Someone who isn't allowed to see a private profile gets a lock screen, and your films are never even sent to their browser. (`can_view()`)
+- **Finding people works like finding films.** On Discover you search by name or `@handle`, and what you type goes into the page address, just like film search.
+- **Unfollowing a private account asks you to confirm**, because getting back in would need their approval again.
+- **Following twice does nothing extra, and you can't follow yourself.**
+- **Other members' account ids never reach your browser.** Pages and responses only ever use handles. All the social features fetch other people's data through special database functions that check permission first and leave the ids out. (`get_profile`, `search_members`, `get_feed`, `friends_who_watched` and the other functions in `supabase/migrations/`)
 
-- Session refresh and sign-in redirects live in `src/proxy.ts`, Next 16's replacement for `middleware.ts`.
-- `error.tsx` files use Next 16's `retry()`, which re-fetches, rather than `reset()`.
+### Activity feed and "friends who watched"
+
+- **The Feed shows what the people you follow have done**: films they watched (with their stars) and films they added to their watchlist, newest first, 20 at a time with a **Load more** button. Requests that haven't been approved yet show nothing.
+- **The feed is built from your friends' actual lists**, not a separate log. So if someone un-marks a film or removes it from their watchlist, it disappears from the feed too, and the two can never disagree. (`get_feed`)
+- **Posters show who you follow has watched each film** as a small stack of avatars, and a film's page lists them with their ratings. Each grid of posters asks for this information once, not once per poster, to keep things fast. (`friends_who_watched`)
+- **The avatar stack sits in the poster's top-left corner** rather than the design's bottom-right, so it doesn't overlap your star rating on narrow phone screens.
+
+### The AI taste profile
+
+- **The AI only runs when you press Generate or Regenerate**, and the result is saved, so opening the Taste page later is instant. The page also tells you when you've rated more films since it was made. (`POST /api/taste`)
+- **You need at least 5 rated films**, and you can regenerate at most once a minute. The limit protects the AI key from being overused.
+- **The AI's answer is double-checked before it's used.** It's told exactly what shape of answer to give, and that shape is checked again on Reel's side. If Google's AI is briefly too busy, Reel automatically tries again a few times. (`src/lib/gemini.ts`)
+- **Every recommended film is checked against TMDB.** Films the AI made up, repeats, and films you've already watched are dropped, so every pick is a real film you can open.
+- **While it's thinking you see a simple message**, not a fake progress bar, because Reel can't actually measure the AI's progress.
+
+### Reels (swipe to discover)
+
+- **One film card at a time, like a dating app.** Swipe right (or tap the bookmark, or press the right arrow) to add a film to your watchlist; swipe left (or tap the cross, or press the left arrow) to skip it. A short or slow drag springs back so you don't decide by accident.
+- **Where the films come from:** first your AI taste picks, then films similar to the ones you rated 4 or 5 stars ("Because you loved Past Lives"), or trending films if you haven't rated anything that highly yet. Films you've already watched or saved are left out. (`src/lib/reels.ts`)
+- **Skips only last for your current visit.** Skipped films won't come back until you reload the page.
+- **The animation uses the Motion library** (the new name for Framer Motion), and it calms down if your device is set to reduce motion.
+
+### When something goes wrong
+
+- **Every change shows up instantly**, before the server has confirmed it. If saving fails, the change quietly undoes itself and you see a short message. This is called "optimistic UI".
+- **Buttons that set something take the result you want, not "toggle".** For example "put this on my watchlist" rather than "flip it", so a double tap can't flip it back the wrong way. (`setOnWatchlist`, `setWatched`)
+- **Mistakes come back as clear messages, not crashes.** Bad input, an unknown film or handle, rating a film you haven't watched, or following yourself all return a plain message. Only genuine server problems are treated as errors. The API routes answer with "400" for bad input and "401" if you're signed out.
+- **Every page that loads data has a loading placeholder and an error screen** with a Try again button.
+
+### Look and feel
+
+- **Colours come from a fixed set of design tokens** (named colours like `surface`, `ink` and `accent`). Tailwind's built-in colours are switched off so nothing off-palette can slip in.
+- **One font (Manrope), Lucide icons only, and no emoji anywhere.** The sign-in buttons use the official Google, GitHub and Discord logos.
+- **Yellow is saved for things that matter**: buttons when you hover or press them, filled stars, the tab you're on, and focus outlines.
+- **One deliberate exception:** a faint dotted background that glows yellow around your mouse, plus letterbox bars on a film's backdrop. They add a bit of cinema feel, against the design system's usual "no decoration" rule.
+- **Most pages share a centred column**; the movie page and Reels break out of it so their artwork can fill the screen.
+- **On someone else's profile, the Feed tab lights up**, because that's where you'd normally have come from (via Discover). Your own profile lights up the Profile tab.
+- **Films without a poster show a film icon** instead of a blank space.
+- **Sign out is in Settings**, with a shortcut icon in the desktop top bar.
+
+### Next.js 16 specifics
+
+- **The "proxy" file is what used to be called middleware.** It keeps your login fresh and sends you to sign-in if you're signed out. Next.js 16 renamed it. (`src/proxy.ts`)
+- **Error screens use Next 16's `retry()`**, which reloads the data properly, rather than the older `reset()`.
 
 ## Known limitations
 
