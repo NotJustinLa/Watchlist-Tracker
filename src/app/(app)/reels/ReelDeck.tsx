@@ -26,12 +26,11 @@ import { Bookmark, CircleAlert, Search, Sparkles, X } from 'lucide-react';
 import { Button, ButtonLink } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
 import { setOnWatchlist } from '@/app/(app)/movie/[id]/actions';
+import { EASE_IN, EASE_OUT, ENTER_DURATION } from '@/lib/motion';
 import type { ReelItem } from '@/lib/reels';
 
 type Decision = 'save' | 'skip';
 
-const EASE_OUT = [0.22, 1, 0.36, 1] as const;
-const EASE_IN = [0.55, 0, 1, 0.45] as const;
 /** Drag past this (px), or flick faster than this (px/s), to decide. */
 const SWIPE_DISTANCE = 110;
 const SWIPE_VELOCITY = 600;
@@ -44,7 +43,11 @@ const text = {
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.42, ease: EASE_OUT, delay: 0.08 + i * 0.06 },
+    transition: {
+      duration: ENTER_DURATION,
+      ease: EASE_OUT,
+      delay: 0.08 + i * 0.06,
+    },
   }),
 };
 

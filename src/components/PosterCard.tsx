@@ -84,7 +84,7 @@ export function PosterCard({
         href={href}
         className="group flex min-w-0 flex-col gap-2 focus-visible:outline-none"
       >
-        <div className="relative rounded-lg transition group-hover:-translate-y-0.5 group-hover:shadow-poster group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-accent">
+        <div className="relative rounded-lg transition group-hover:-translate-y-0.5 group-hover:shadow-poster group-active:scale-97 group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-accent">
           <Poster
             url={posterUrl}
             sizes="(min-width: 1280px) 200px, (min-width: 1024px) 20vw, (min-width: 640px) 25vw, 33vw"

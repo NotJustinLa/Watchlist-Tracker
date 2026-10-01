@@ -89,7 +89,7 @@ export default async function MoviePage({ params }: PageProps<'/movie/[id]'>) {
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-content flex-col gap-6 px-4 pt-6 md:grid md:grid-cols-[1.4fr_1fr] md:items-start md:gap-8 md:px-8 md:pt-8">
+      <div className="stagger mx-auto flex max-w-content flex-col gap-6 px-4 pt-6 md:grid md:grid-cols-[1.4fr_1fr] md:items-start md:gap-8 md:px-8 md:pt-8">
         <div className="md:order-2">
           <MovieActions
             tmdbId={movie.id}
@@ -114,7 +114,7 @@ export default async function MoviePage({ params }: PageProps<'/movie/[id]'>) {
                 body="Be the first of your circle to log it."
               />
             ) : (
-              <ul>
+              <ul className="stagger">
                 {friends.map((friend) => (
                   <li
                     key={friend.handle}

@@ -77,7 +77,7 @@ async function Members({ query }: { query: string }) {
       <h2 className="text-overline text-muted uppercase">
         {members.length} {members.length === 1 ? 'member' : 'members'}
       </h2>
-      <ul>
+      <ul className="stagger">
         {members.map((member) => (
           <li
             key={member.handle}

@@ -49,7 +49,7 @@ export function FeedList({
 
   return (
     <div className="flex max-w-2xl flex-col gap-4">
-      <ul>
+      <ul className="stagger">
         {events.map((event) => (
           <FeedItem
             key={`${event.kind}-${event.handle}-${event.tmdbId}`}

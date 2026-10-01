@@ -22,14 +22,25 @@ const words = [
 /**
  * One star, filled yellow when it's part of the rating and outlined when it
  * isn't.
+ *
+ * When `pop` is set (the stars you can tap), a star gives a small springy pop
+ * the moment it fills in.
  */
-function StarIcon({ filled, size }: { filled: boolean; size: number }) {
+function StarIcon({
+  filled,
+  size,
+  pop = false,
+}: {
+  filled: boolean;
+  size: number;
+  pop?: boolean;
+}) {
   return (
     <Star
       size={size}
       strokeWidth={size > 20 ? 1.75 : 2}
       aria-hidden
-      className={`transition-colors ${filled ? 'fill-accent text-accent' : 'text-line-strong'}`}
+      className={`transition-colors ${filled ? `fill-accent text-accent ${pop ? 'animate-pop' : ''}` : 'text-line-strong'}`}
     />
   );
 }
@@ -95,7 +106,7 @@ export function StarRating({
               className="sr-only"
             />
             <span className="sr-only">{`${n} star${n > 1 ? 's' : ''}`}</span>
-            <StarIcon filled={n <= shown} size={compact ? 16 : 30} />
+            <StarIcon filled={n <= shown} size={compact ? 16 : 30} pop />
           </label>
         ))}
       </div>

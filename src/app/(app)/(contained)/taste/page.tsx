@@ -99,7 +99,7 @@ export default async function TastePage() {
           (recommendations.length > 0 ? (
             <section className="flex flex-col gap-3">
               <h2 className="text-title">Picked for you</h2>
-              <ul className="grid gap-3 md:grid-cols-2">
+              <ul className="stagger grid gap-3 md:grid-cols-2">
                 {recommendations.map((rec) => (
                   <li
                     key={rec.tmdbId}

@@ -29,7 +29,7 @@ export function RequestList({ requests }: { requests: Person[] }) {
     );
   }
   return (
-    <ul className="max-w-2xl">
+    <ul className="stagger max-w-2xl">
       {rows.map((person) => (
         <RequestRow key={person.handle} person={person} />
       ))}
