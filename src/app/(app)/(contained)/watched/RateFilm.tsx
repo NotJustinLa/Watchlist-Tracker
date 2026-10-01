@@ -22,7 +22,7 @@ export function RateFilm({
     startTransition(async () => {
       setOptimistic(next);
       try {
-        await rateMovie(tmdbId, next || null);
+        if (await rateMovie(tmdbId, next || null)) setFailed(true);
       } catch {
         setFailed(true);
       }

@@ -22,7 +22,7 @@ export function WatchlistToggle({
     startTransition(async () => {
       setOptimistic(next);
       try {
-        await setOnWatchlist(tmdbId, next);
+        if (await setOnWatchlist(tmdbId, next)) setFailed(true);
       } catch {
         setFailed(true);
       }

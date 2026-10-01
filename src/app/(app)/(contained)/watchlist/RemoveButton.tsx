@@ -19,7 +19,7 @@ export function RemoveButton({
     setFailed(false);
     startTransition(async () => {
       try {
-        await setOnWatchlist(tmdbId, false);
+        if (await setOnWatchlist(tmdbId, false)) setFailed(true);
       } catch {
         setFailed(true);
       }

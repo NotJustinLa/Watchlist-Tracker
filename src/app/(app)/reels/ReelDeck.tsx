@@ -92,9 +92,11 @@ export function ReelDeck({ initial }: { initial: ReelItem[] }) {
     setSwiped(true);
     setIndex((i) => i + 1);
     if (decision === 'save') {
-      setOnWatchlist(item.id, true).catch(() =>
-        setNotice(`Couldn’t add ${item.title} to your watchlist.`),
-      );
+      const fail = () =>
+        setNotice(`Couldn’t add ${item.title} to your watchlist.`);
+      setOnWatchlist(item.id, true)
+        .then((result) => result && fail())
+        .catch(fail);
     }
   }
 

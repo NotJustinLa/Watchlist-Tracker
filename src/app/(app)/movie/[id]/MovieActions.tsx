@@ -5,6 +5,7 @@ import { useOptimistic, useState, useTransition } from 'react';
 import { Bookmark, BookmarkCheck, Check, CircleAlert, Eye } from 'lucide-react';
 import { Button } from '@/components/Button';
 import { StarRating, type Rating } from '@/components/StarRating';
+import type { ActionError } from '@/lib/validation';
 import { setOnWatchlist, setWatched } from './actions';
 
 type State = { watched: boolean; rating: Rating; onWatchlist: boolean };
@@ -16,12 +17,12 @@ export function MovieActions({ tmdbId, ...saved }: State & { tmdbId: number }) {
 
   // Shows `next` immediately; when the action settles the page re-renders with
   // saved state, so a failure reverts on its own.
-  function run(next: State, action: () => Promise<void>) {
+  function run(next: State, action: () => Promise<ActionError | void>) {
     setFailed(false);
     startTransition(async () => {
       setOptimistic(next);
       try {
-        await action();
+        if (await action()) setFailed(true);
       } catch {
         setFailed(true);
       }

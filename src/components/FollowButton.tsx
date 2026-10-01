@@ -45,14 +45,16 @@ export function FollowButton({
 
   function onClick() {
     if (state === 'none') {
-      run(isPrivate ? 'requested' : 'following', async () =>
-        (await follow(handle)) === 'pending' ? 'requested' : 'following',
-      );
+      run(isPrivate ? 'requested' : 'following', async () => {
+        const result = await follow(handle);
+        if ('error' in result) throw new Error(result.error);
+        return result.status === 'pending' ? 'requested' : 'following';
+      });
     } else if (state === 'following' && isPrivate && !confirming) {
       setConfirming(true);
     } else {
       run('none', async () => {
-        await unfollow(handle);
+        if (await unfollow(handle)) throw new Error('Couldn’t unfollow');
         return 'none';
       });
     }

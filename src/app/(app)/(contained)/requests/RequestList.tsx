@@ -41,8 +41,8 @@ function RequestRow({ person }: { person: Person }) {
     setOutcome(undefined);
     startTransition(async () => {
       try {
-        await respondToRequest(person.handle, approve);
-        setOutcome(approve ? 'approved' : 'declined');
+        const result = await respondToRequest(person.handle, approve);
+        setOutcome(result ? 'failed' : approve ? 'approved' : 'declined');
       } catch {
         setOutcome('failed');
       }

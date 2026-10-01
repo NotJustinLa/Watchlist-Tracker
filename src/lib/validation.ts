@@ -79,3 +79,10 @@ export const storedRecommendationsSchema = z.array(
     reason: z.string(),
   }),
 );
+
+/**
+ * What a server action returns for a problem the caller can fix (bad input, an
+ * unknown film or handle). Genuine server failures still throw.
+ */
+export type ActionError = { error: string };
+export const invalidInput: ActionError = { error: 'Invalid input.' };
