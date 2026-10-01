@@ -59,7 +59,7 @@ async function Results({ query }: { query: string }) {
             year={movie.year}
             posterUrl={movie.posterUrl}
             href={`/movie/${movie.id}`}
-            rating={mine.ratings.get(movie.id)}
+            rating={mine.watched.get(movie.id) ?? undefined}
             watchlisted={mine.watchlist.has(movie.id)}
           />
         ))}

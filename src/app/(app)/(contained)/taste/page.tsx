@@ -14,7 +14,7 @@ export default async function TastePage() {
   // RLS limits both reads to the signed-in user's own rows.
   const supabase = await createClient();
   const [watched, saved] = await Promise.all([
-    supabase.from('watched').select('tmdb_id'),
+    supabase.from('watched').select('tmdb_id, rating'),
     supabase
       .from('taste_profiles')
       .select('summary, recommendations, rating_count')
@@ -23,7 +23,8 @@ export default async function TastePage() {
   if (watched.error) throw watched.error;
   if (saved.error) throw saved.error;
 
-  const ratingCount = watched.data.length;
+  // Only rated films count towards the profile; unrated ones are still hidden from picks.
+  const ratingCount = watched.data.filter((row) => row.rating !== null).length;
   const heading = <h1 className="text-title-lg">Taste</h1>;
 
   if (ratingCount < MIN_RATINGS) {
@@ -49,8 +50,8 @@ export default async function TastePage() {
                   style={{ width: `${(ratingCount / MIN_RATINGS) * 100}%` }}
                 />
               </div>
-              <ButtonLink href="/" icon={Eye}>
-                Rate films you’ve seen
+              <ButtonLink href="/watched" icon={Eye}>
+                Rate films you’ve watched
               </ButtonLink>
             </div>
           }

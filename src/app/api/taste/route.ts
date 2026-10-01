@@ -33,14 +33,18 @@ export async function POST() {
   if (lastRun && Date.now() - lastRun < COOLDOWN_MS) {
     return fail(429, 'You can regenerate again in a minute.');
   }
-  if (watched.data.length < MIN_RATINGS) {
+  // Only rated films say anything about taste.
+  const rated = watched.data.flatMap(({ rating, movies }) =>
+    rating === null ? [] : [{ rating, movies }],
+  );
+  if (rated.length < MIN_RATINGS) {
     return fail(400, `Rate at least ${MIN_RATINGS} films first.`);
   }
 
   let taste;
   try {
     taste = await generateTasteProfile(
-      watched.data.map(({ rating, movies }) => ({
+      rated.map(({ rating, movies }) => ({
         title: movies.title,
         year: movies.release_year,
         genres: movies.genres,
@@ -83,7 +87,7 @@ export async function POST() {
     user_id: user.id,
     summary: taste.summary,
     recommendations,
-    rating_count: watched.data.length,
+    rating_count: rated.length,
     generated_at: new Date().toISOString(),
   });
   if (error) return fail(500, 'Could not save your taste profile.');

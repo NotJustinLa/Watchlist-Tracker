@@ -54,28 +54,39 @@ export async function setOnWatchlist(tmdbId: number, onWatchlist: boolean) {
   revalidatePath('/', 'layout');
 }
 
-// Rating marks the film watched and takes it off the watchlist.
-// Re-rating keeps the original watched_at.
-export async function rateMovie(tmdbId: number, rating: number) {
+// Marking watched takes the film off the watchlist. Unmarking also drops its rating.
+export async function setWatched(tmdbId: number, watched: boolean) {
   const session = await requireUser();
   const { user, supabase } = session;
   const id = tmdbIdSchema.parse(tmdbId);
-  const stars = ratingSchema.parse(rating);
+  const on = z.boolean().parse(watched);
 
-  await saveMovieSnapshot(id);
-  const { error } = await supabase
-    .from('watched')
-    .upsert({ user_id: user.id, tmdb_id: id, rating: stars });
-  if (error) throw error;
-
-  await deleteOwnRow(session, 'watchlist_items', id);
+  if (on) {
+    await saveMovieSnapshot(id);
+    const { error } = await supabase
+      .from('watched')
+      .upsert({ user_id: user.id, tmdb_id: id }, { ignoreDuplicates: true });
+    if (error) throw error;
+    await deleteOwnRow(session, 'watchlist_items', id);
+  } else {
+    await deleteOwnRow(session, 'watched', id);
+  }
   revalidatePath('/', 'layout');
 }
 
-export async function removeRating(tmdbId: number) {
-  const session = await requireUser();
+// Sets (1-5) or clears (null) the rating of a film already marked watched.
+export async function rateMovie(tmdbId: number, rating: number | null) {
+  const { user, supabase } = await requireUser();
   const id = tmdbIdSchema.parse(tmdbId);
+  const stars = ratingSchema.nullable().parse(rating);
 
-  await deleteOwnRow(session, 'watched', id);
+  const { data, error } = await supabase
+    .from('watched')
+    .update({ rating: stars })
+    .eq('user_id', user.id)
+    .eq('tmdb_id', id)
+    .select('tmdb_id');
+  if (error) throw error;
+  if (data.length === 0) throw new Error('Mark the film as watched first');
   revalidatePath('/', 'layout');
 }

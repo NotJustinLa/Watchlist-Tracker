@@ -19,9 +19,9 @@ export const watchedSortSchema = z
   .enum(['recent', 'rating', 'title'])
   .catch('recent');
 
-export const starFilterSchema = z.coerce
-  .number()
-  .pipe(ratingSchema)
+// Watched page filter: a star count, or films not rated yet.
+export const watchedFilterSchema = z
+  .union([z.literal('unrated'), z.coerce.number().pipe(ratingSchema)])
   .optional()
   .catch(undefined);
 

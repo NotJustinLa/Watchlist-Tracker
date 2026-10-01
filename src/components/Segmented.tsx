@@ -21,7 +21,7 @@ export function Segmented({
   return (
     <nav
       aria-label={label}
-      className="inline-flex gap-0.5 rounded-md border border-line bg-surface p-0.75"
+      className="inline-flex flex-wrap gap-0.5 rounded-md border border-line bg-surface p-0.75"
     >
       {options.map(({ label, href, active, icon: Icon, ariaLabel }) => (
         <Link

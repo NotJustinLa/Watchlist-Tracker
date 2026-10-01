@@ -124,19 +124,19 @@ export type Database = {
       };
       watched: {
         Row: {
-          rating: number;
+          rating: number | null;
           tmdb_id: number;
           user_id: string;
           watched_at: string;
         };
         Insert: {
-          rating: number;
+          rating?: number | null;
           tmdb_id: number;
           user_id: string;
           watched_at?: string;
         };
         Update: {
-          rating?: number;
+          rating?: number | null;
           tmdb_id?: number;
           user_id?: string;
           watched_at?: string;

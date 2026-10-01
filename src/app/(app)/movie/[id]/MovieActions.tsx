@@ -1,12 +1,13 @@
 'use client';
 
+import Link from 'next/link';
 import { useOptimistic, useState, useTransition } from 'react';
-import { Bookmark, BookmarkCheck, CircleAlert } from 'lucide-react';
+import { Bookmark, BookmarkCheck, Check, CircleAlert, Eye } from 'lucide-react';
 import { Button } from '@/components/Button';
 import { StarRating, type Rating } from '@/components/StarRating';
-import { rateMovie, removeRating, setOnWatchlist } from './actions';
+import { setOnWatchlist, setWatched } from './actions';
 
-type State = { rating: Rating; onWatchlist: boolean };
+type State = { watched: boolean; rating: Rating; onWatchlist: boolean };
 
 export function MovieActions({ tmdbId, ...saved }: State & { tmdbId: number }) {
   const [state, setOptimistic] = useOptimistic(saved);
@@ -27,9 +28,15 @@ export function MovieActions({ tmdbId, ...saved }: State & { tmdbId: number }) {
     });
   }
 
-  function rate(rating: Rating) {
-    run({ rating, onWatchlist: rating ? false : state.onWatchlist }, () =>
-      rating ? rateMovie(tmdbId, rating) : removeRating(tmdbId),
+  function toggleWatched() {
+    const watched = !state.watched;
+    run(
+      {
+        watched,
+        rating: watched ? state.rating : 0,
+        onWatchlist: watched ? false : state.onWatchlist,
+      },
+      () => setWatched(tmdbId, watched),
     );
   }
 
@@ -40,17 +47,37 @@ export function MovieActions({ tmdbId, ...saved }: State & { tmdbId: number }) {
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-line bg-surface p-4 md:p-6">
-      <Button
-        on={state.onWatchlist}
-        icon={state.onWatchlist ? BookmarkCheck : Bookmark}
-        onClick={toggleWatchlist}
-        className="w-full"
-      >
-        {state.onWatchlist ? 'On watchlist' : 'Add to watchlist'}
-      </Button>
-      <div className="border-t border-line pt-3">
-        <StarRating value={state.rating} onChange={rate} />
+      <div className="grid gap-2 xl:grid-cols-2">
+        <Button
+          on={state.onWatchlist}
+          icon={state.onWatchlist ? BookmarkCheck : Bookmark}
+          onClick={toggleWatchlist}
+        >
+          {state.onWatchlist ? 'On watchlist' : 'Add to watchlist'}
+        </Button>
+        <Button
+          on={state.watched}
+          icon={state.watched ? Check : Eye}
+          onClick={toggleWatched}
+        >
+          {state.watched ? 'Watched' : 'Mark as watched'}
+        </Button>
       </div>
+      {state.watched && (
+        <div className="flex items-center justify-between gap-3 border-t border-line pt-3 text-body-sm text-muted">
+          {state.rating ? (
+            <StarRating value={state.rating} />
+          ) : (
+            <span>Not rated yet</span>
+          )}
+          <Link
+            href={state.rating ? '/watched' : '/watched?stars=unrated'}
+            className="font-bold text-ink hover:underline"
+          >
+            {state.rating ? 'Change in Watched' : 'Rate it in Watched'}
+          </Link>
+        </div>
+      )}
       {failed && (
         <p
           role="alert"

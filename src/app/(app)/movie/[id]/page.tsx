@@ -74,7 +74,8 @@ export default async function MoviePage({ params }: PageProps<'/movie/[id]'>) {
         <div className="md:order-2">
           <MovieActions
             tmdbId={movie.id}
-            rating={(mine.ratings.get(movie.id) ?? 0) as Rating}
+            watched={mine.watched.has(movie.id)}
+            rating={(mine.watched.get(movie.id) ?? 0) as Rating}
             onWatchlist={mine.watchlist.has(movie.id)}
           />
         </div>

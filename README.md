@@ -1,6 +1,6 @@
 # Reel
 
-A movie watchlist and rating tracker with an AI taste profile. Search films, save them to a watchlist, rate what you've watched, and get a short read on your taste with recommendations grounded in real films.
+A movie watchlist and rating tracker with an AI taste profile. Search films, save them to a watchlist, mark what you've watched and rate it, and get a short read on your taste with recommendations grounded in real films.
 
 Built with Next.js (App Router), TypeScript, Tailwind, Supabase (Auth, Postgres, RLS), TMDB and Gemini. Deployed on Vercel.
 
@@ -8,9 +8,9 @@ Built with Next.js (App Router), TypeScript, Tailwind, Supabase (Auth, Postgres,
 
 - **Sign in** with Google, GitHub or Discord (OAuth only, no passwords).
 - **Search** TMDB as you type, or browse "Popular right now". Posters show your rating and watchlist status.
-- **Movie pages** with backdrop, poster, runtime, genres and overview, plus an add-to-watchlist button and a 1–5 star rating.
+- **Movie pages** with backdrop, poster, runtime, genres and overview, plus **Add to watchlist** and **Mark as watched**.
 - **Watchlist** sorted by date added or title, with remove on each poster.
-- **Watched** list sorted by recent, rating or title, filterable by star count.
+- **Watched** list (its own tab) where you rate each film with 1–5 stars under its poster. Sort by recent, rating or title; filter by star count or show only unrated films.
 - **Taste profile**: once you've rated 5 films, Gemini writes a one-to-two sentence summary of your taste and recommends 3–5 films you haven't seen, each with a reason that names a film you rated.
 
 ## Running locally
@@ -87,21 +87,22 @@ supabase/migrations/             Schema, RLS and the profile trigger
 ## Decisions
 
 **Product**
-- Movies only, via TMDB. Ratings are 1–5 whole stars, and a film is "watched" once it has a rating; there is no separate "Mark as watched" step.
-- Rating a film removes it from the watchlist. A watched film can be added back to rewatch; rating it again removes it again.
-- Re-rating keeps the original `watched_at`.
-- Search is the home page (`/`); the Watched page is reached from the Profile tab.
+- Movies only, via TMDB. Ratings are 1–5 whole stars.
+- Watching and rating are separate steps: **Mark as watched** on a film's page adds it to Watched, and you rate it from the Watched page. A rating is optional, and only rated films count towards the taste profile.
+- Marking a film watched removes it from the watchlist; a watched film can be added back to rewatch. Unmarking a film removes it from Watched along with its rating.
+- Changing or clearing a rating keeps the original `watched_at`.
+- Search is the home page (`/`). The nav has six tabs: Search, Feed, Watchlist, Watched, Taste, Profile.
 
 **Data**
 - A minimal `movies` snapshot (title, poster path, year, genres) is stored when a user first saves or rates a film, so lists and the AI prompt don't need a TMDB call per film. It is a display snapshot, not a TMDB mirror.
 - Profiles are created by a database trigger on sign-up. Handles are slugified from the OAuth name (fallback `user`), up to 16 characters, with a numeric suffix on collision.
-- `setOnWatchlist(tmdbId, on)` takes the desired state rather than toggling, so a double tap or retry can't flip it the wrong way.
-- List sorts and filters live in the URL (`?sort=`, `?stars=`); invalid values fall back to defaults.
+- `setOnWatchlist(tmdbId, on)` and `setWatched(tmdbId, on)` take the desired state rather than toggling, so a double tap or retry can't flip it the wrong way. `rateMovie(tmdbId, rating | null)` only updates a film already marked watched.
+- List sorts and filters live in the URL (`?sort=`, `?stars=1..5|unrated`); invalid values fall back to defaults. Sorting by rating puts unrated films last.
 - TMDB responses are cached for an hour. Images use TMDB sizes: `w342` in grids, `w500` for the detail poster, `w1280` for backdrops.
 
 **AI taste profile**
 - Generated only on request (`POST /api/taste`), stored in `taste_profiles` with the rating count it used, and shown from storage afterwards. The page notes when you've rated more films since.
-- Needs at least 5 ratings. Regenerating is limited to once a minute per user to protect the API key.
+- Needs at least 5 rated films (watched-but-unrated films don't count). Regenerating is limited to once a minute per user to protect the API key.
 - Gemini returns JSON against a response schema derived from the same zod schema that validates it. Transient errors (such as 503 "high demand") are retried up to 3 times within a 30-second timeout.
 - Each recommendation is matched to TMDB by title and year (±1). Picks that don't match, repeat, or are already watched are dropped; picks you watch later are hidden.
 - The loading state is a plain "Thinking about your ratings…" with skeletons rather than the design's timed step animation, so the UI never implies progress it can't measure.
@@ -120,7 +121,7 @@ supabase/migrations/             Schema, RLS and the profile trigger
 
 ## Known limitations
 
-- **Social features aren't built yet.** Public/private profiles, follows and follow requests, an activity feed and editable handles are planned. The Profile tab is a placeholder at `/u/me` with links to Watched and Sign out.
+- **Social features aren't built yet.** Public/private profiles, follows and follow requests, an activity feed and editable handles are planned. The Profile tab is a placeholder at `/u/me` with Sign out. The Feed tab has no page yet.
 - **Google's consent screen names the Supabase domain** (`<project-ref>.supabase.co`) rather than the app, because Supabase handles the OAuth exchange. Fixing this needs a Supabase custom domain (paid).
 - **Unknown movie ids return HTTP 200** with the 404 page and a `noindex` tag, because `loading.tsx` starts streaming before the id is checked. This is documented Next.js behaviour.
 - **Gemini availability**: generation depends on Google's model capacity. Retries cover short spikes; a sustained outage shows an error with "Try again", and the previous profile is kept.

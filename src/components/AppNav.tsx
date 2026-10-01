@@ -2,21 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Activity, Bookmark, Search, Sparkles, User } from 'lucide-react';
+import { Activity, Bookmark, Eye, Search, Sparkles, User } from 'lucide-react';
 import { SignOutButton } from './SignOutButton';
 
-type NavId = 'search' | 'feed' | 'watchlist' | 'taste' | 'profile';
+type NavId = 'search' | 'feed' | 'watchlist' | 'watched' | 'taste' | 'profile';
 
 function activeTab(pathname: string): NavId {
   if (pathname.startsWith('/feed') || pathname.startsWith('/discover'))
     return 'feed';
   if (pathname.startsWith('/watchlist')) return 'watchlist';
+  if (pathname.startsWith('/watched')) return 'watched';
   if (pathname.startsWith('/taste')) return 'taste';
-  if (
-    ['/u/', '/watched', '/requests', '/settings'].some((p) =>
-      pathname.startsWith(p),
-    )
-  ) {
+  if (['/u/', '/requests', '/settings'].some((p) => pathname.startsWith(p))) {
     return 'profile';
   }
   return 'search';
@@ -28,6 +25,7 @@ export function AppNav({ profileHref }: { profileHref: string }) {
     { id: 'search', label: 'Search', href: '/', icon: Search },
     { id: 'feed', label: 'Feed', href: '/feed', icon: Activity },
     { id: 'watchlist', label: 'Watchlist', href: '/watchlist', icon: Bookmark },
+    { id: 'watched', label: 'Watched', href: '/watched', icon: Eye },
     { id: 'taste', label: 'Taste', href: '/taste', icon: Sparkles },
     { id: 'profile', label: 'Profile', href: profileHref, icon: User },
   ] as const;

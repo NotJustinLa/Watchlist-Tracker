@@ -1,12 +1,15 @@
 import { createClient } from './supabase/server';
 
 /**
- * The signed-in user's rating and watchlist status for the given films,
- * in one query per table. RLS limits both to the user's own rows.
+ * The signed-in user's watched status (with rating, if any) and watchlist status
+ * for the given films, in one query per table. RLS limits both to the user's own rows.
  */
 export async function getMyFilmStates(tmdbIds: number[]) {
   if (tmdbIds.length === 0) {
-    return { ratings: new Map<number, number>(), watchlist: new Set<number>() };
+    return {
+      watched: new Map<number, number | null>(),
+      watchlist: new Set<number>(),
+    };
   }
   const supabase = await createClient();
   const [watched, watchlist] = await Promise.all([
@@ -17,7 +20,7 @@ export async function getMyFilmStates(tmdbIds: number[]) {
   if (watchlist.error) throw watchlist.error;
 
   return {
-    ratings: new Map(watched.data.map((row) => [row.tmdb_id, row.rating])),
+    watched: new Map(watched.data.map((row) => [row.tmdb_id, row.rating])),
     watchlist: new Set(watchlist.data.map((row) => row.tmdb_id)),
   };
 }

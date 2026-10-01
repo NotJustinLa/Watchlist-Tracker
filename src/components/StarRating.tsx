@@ -30,12 +30,15 @@ type StarRatingProps = {
   value: Rating;
   onChange?: (value: Rating) => void;
   label?: string;
+  /** Small stars only, for poster grids: no hint text or Clear (tap the current star to clear). */
+  compact?: boolean;
 };
 
 export function StarRating({
   value,
   onChange,
   label = 'Your rating',
+  compact = false,
 }: StarRatingProps) {
   const name = useId();
   const [preview, setPreview] = useState<Rating>(0);
@@ -59,14 +62,14 @@ export function StarRating({
     <fieldset className="flex flex-col gap-2">
       <legend className="sr-only">{label}</legend>
       <div
-        className="-ml-1.5 flex gap-0.5"
+        className={compact ? 'flex' : '-ml-1.5 flex gap-0.5'}
         onPointerLeave={() => setPreview(0)}
       >
         {stars.map((n) => (
           <label
             key={n}
             onPointerEnter={(e) => e.pointerType === 'mouse' && setPreview(n)}
-            className="flex size-11 cursor-pointer items-center justify-center rounded-md transition-transform active:scale-90 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent"
+            className={`flex cursor-pointer items-center justify-center rounded-md transition-transform active:scale-90 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent ${compact ? 'size-5' : 'size-11'}`}
           >
             <input
               type="radio"
@@ -78,22 +81,24 @@ export function StarRating({
               className="sr-only"
             />
             <span className="sr-only">{`${n} star${n > 1 ? 's' : ''}`}</span>
-            <StarIcon filled={n <= shown} size={30} />
+            <StarIcon filled={n <= shown} size={compact ? 16 : 30} />
           </label>
         ))}
       </div>
-      <div className="flex min-h-9 items-center gap-3 text-body-sm text-muted">
-        {value === 0 ? (
-          'Unrated · tap a star to rate'
-        ) : (
-          <>
-            {words[value - 1]}
-            <Button variant="ghost" size="sm" onClick={() => onChange(0)}>
-              Clear
-            </Button>
-          </>
-        )}
-      </div>
+      {!compact && (
+        <div className="flex min-h-9 items-center gap-3 text-body-sm text-muted">
+          {value === 0 ? (
+            'Unrated · tap a star to rate'
+          ) : (
+            <>
+              {words[value - 1]}
+              <Button variant="ghost" size="sm" onClick={() => onChange(0)}>
+                Clear
+              </Button>
+            </>
+          )}
+        </div>
+      )}
     </fieldset>
   );
 }

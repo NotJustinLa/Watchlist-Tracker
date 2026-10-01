@@ -45,6 +45,8 @@ type PosterCardProps = {
   watchlisted?: boolean;
   /** A control over the poster's top-right corner (e.g. remove), kept outside the link. */
   action?: ReactNode;
+  /** Content under the title (e.g. a rating input), kept outside the link. */
+  footer?: ReactNode;
 };
 
 export function PosterCard({
@@ -55,6 +57,7 @@ export function PosterCard({
   rating,
   watchlisted,
   action,
+  footer,
 }: PosterCardProps) {
   return (
     <div className="relative min-w-0">
@@ -93,6 +96,7 @@ export function PosterCard({
         </div>
       </Link>
       {action && <div className="absolute top-1.5 right-1.5">{action}</div>}
+      {footer && <div className="mt-1.5">{footer}</div>}
     </div>
   );
 }
