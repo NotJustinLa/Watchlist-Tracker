@@ -58,7 +58,22 @@ export type Database = {
           follower_id?: string;
           status?: Database['public']['Enums']['follow_status'];
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'follows_followee_id_fkey';
+            columns: ['followee_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'follows_follower_id_fkey';
+            columns: ['follower_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       movies: {
         Row: {
@@ -240,6 +255,16 @@ export type Database = {
         Args: { approve: boolean; follower_handle: string };
         Returns: undefined;
       };
+      search_members: {
+        Args: { query: string };
+        Returns: {
+          avatar_url: string;
+          display_name: string;
+          handle: string;
+          is_private: boolean;
+          relationship: string;
+        }[];
+      };
       unfollow_by_handle: {
         Args: { target_handle: string };
         Returns: undefined;
@@ -373,11 +398,11 @@ export type CompositeTypes<
 
 export const Constants = {
   graphql_public: {
+    Enums: {},
+  },
+  public: {
     Enums: {
       follow_status: ['pending', 'accepted'],
     },
-  },
-  public: {
-    Enums: {},
   },
 } as const;

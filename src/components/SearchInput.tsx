@@ -5,7 +5,18 @@ import { useRouter } from 'next/navigation';
 import { Search, X } from 'lucide-react';
 import { Button } from './Button';
 
-export function SearchInput({ defaultValue }: { defaultValue: string }) {
+type SearchInputProps = {
+  defaultValue: string;
+  /** Page whose `?q=` this input drives. */
+  path?: string;
+  placeholder?: string;
+};
+
+export function SearchInput({
+  defaultValue,
+  path = '/',
+  placeholder = 'Search films by title',
+}: SearchInputProps) {
   const router = useRouter();
   const [value, setValue] = useState(defaultValue);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -15,7 +26,7 @@ export function SearchInput({ defaultValue }: { defaultValue: string }) {
     clearTimeout(timer.current);
     timer.current = setTimeout(() => {
       const q = next.trim();
-      router.replace(q ? `/?q=${encodeURIComponent(q)}` : '/', {
+      router.replace(q ? `${path}?q=${encodeURIComponent(q)}` : path, {
         scroll: false,
       });
     }, delay);
@@ -32,8 +43,8 @@ export function SearchInput({ defaultValue }: { defaultValue: string }) {
         type="search"
         value={value}
         onChange={(e) => update(e.target.value)}
-        placeholder="Search films by title"
-        aria-label="Search films by title"
+        placeholder={placeholder}
+        aria-label={placeholder}
         maxLength={100}
         className="h-11 w-full rounded-md border border-line-strong bg-raised pr-12 pl-10 text-body transition-colors placeholder:text-muted focus-visible:border-accent focus-visible:outline-offset-1 [&::-webkit-search-cancel-button]:appearance-none"
       />

@@ -2,6 +2,14 @@ import { z } from 'zod';
 
 export const searchQuerySchema = z.string().trim().max(100).catch('');
 
+// Member search: a leading @ is ignored so "@maya" and "maya" match the same.
+export const memberQuerySchema = z
+  .string()
+  .trim()
+  .transform((q) => q.replace(/^@/, ''))
+  .pipe(z.string().max(50))
+  .catch('');
+
 // Fits the Postgres `integer` column.
 export const tmdbIdSchema = z.number().int().min(1).max(999_999_999);
 

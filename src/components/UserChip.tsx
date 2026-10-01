@@ -1,6 +1,13 @@
 import Image from 'next/image';
+import { Lock } from 'lucide-react';
 
-type Person = { handle: string; displayName: string; avatarUrl: string | null };
+type Person = {
+  handle: string;
+  displayName: string;
+  avatarUrl: string | null;
+  /** Shows a lock after the name. */
+  isPrivate?: boolean;
+};
 
 function initials(name: string) {
   return name
@@ -33,7 +40,17 @@ export function UserChip({ person }: { person: Person }) {
         )}
       </span>
       <span className="flex min-w-0 flex-col">
-        <span className="truncate text-label">{person.displayName}</span>
+        <span className="flex min-w-0 items-center gap-1.5">
+          <span className="truncate text-label">{person.displayName}</span>
+          {person.isPrivate && (
+            <Lock
+              size={13}
+              role="img"
+              aria-label="Private account"
+              className="flex-none text-muted"
+            />
+          )}
+        </span>
         <span className="truncate text-body-sm text-muted">
           @{person.handle}
         </span>
