@@ -274,8 +274,8 @@ export type Database = {
       get_profile: {
         Args: { target_handle: string };
         Returns: {
-          average_rating: number;
           avatar_url: string;
+          average_rating: number;
           display_name: string;
           distribution: number[];
           followers: number;

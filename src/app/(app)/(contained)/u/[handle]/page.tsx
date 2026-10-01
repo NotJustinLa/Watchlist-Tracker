@@ -55,7 +55,8 @@ export default async function ProfilePage({
           <p className="text-body-sm text-muted">@{profile.handle}</p>
           <p className="flex gap-4 text-body-sm text-muted">
             <span>
-              <b className="text-ink">{profile.followers}</b> followers
+              <b className="text-ink">{profile.followers}</b>{' '}
+              {profile.followers === 1 ? 'follower' : 'followers'}
             </span>
             <span>
               <b className="text-ink">{profile.following}</b> following
