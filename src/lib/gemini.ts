@@ -15,7 +15,11 @@ export type RatedFilm = {
 
 export type TasteResponse = z.infer<typeof tasteResponseSchema>;
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Retries transient failures (e.g. 503 "high demand") with a short backoff.
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+  httpOptions: { retryOptions: { attempts: 3, initialDelay: 1, maxDelay: 4 } },
+});
 
 const responseJsonSchema = z.toJSONSchema(tasteResponseSchema);
 

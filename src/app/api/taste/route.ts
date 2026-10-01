@@ -48,7 +48,10 @@ export async function POST() {
       })),
     );
   } catch {
-    return fail(502, 'The AI didn’t return a usable profile. Try again.');
+    return fail(
+      502,
+      'Couldn’t generate your profile right now. Try again in a moment.',
+    );
   }
 
   // Ground each pick in a real TMDB film; drop unknowns, duplicates and films already watched.
