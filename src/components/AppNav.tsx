@@ -16,8 +16,13 @@ import { SignOutButton } from './SignOutButton';
 type NavId =
   'search' | 'reels' | 'feed' | 'watchlist' | 'watched' | 'taste' | 'profile';
 
-function activeTab(pathname: string): NavId {
-  if (pathname.startsWith('/feed') || pathname.startsWith('/discover'))
+function activeTab(pathname: string, profileHref: string): NavId {
+  // Other members' profiles are reached from Discover, so they sit under Feed.
+  const otherProfile = pathname.startsWith('/u/') && pathname !== profileHref;
+  if (
+    ['/feed', '/discover'].some((p) => pathname.startsWith(p)) ||
+    otherProfile
+  )
     return 'feed';
   if (pathname.startsWith('/reels')) return 'reels';
   if (pathname.startsWith('/watchlist')) return 'watchlist';
@@ -37,7 +42,7 @@ export function AppNav({
   /** Pending follow requests, shown as a badge on Profile. */
   requests: number;
 }) {
-  const active = activeTab(usePathname());
+  const active = activeTab(usePathname(), profileHref);
   const items = [
     { id: 'search', label: 'Search', href: '/', icon: Search },
     { id: 'reels', label: 'Reels', href: '/reels', icon: Clapperboard },

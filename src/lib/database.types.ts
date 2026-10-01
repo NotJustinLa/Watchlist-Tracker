@@ -250,6 +250,44 @@ export type Database = {
           requested_at: string;
         }[];
       };
+      get_member_watched: {
+        Args: { target_handle: string };
+        Returns: {
+          poster_path: string;
+          rating: number;
+          release_year: number;
+          title: string;
+          tmdb_id: number;
+          watched_at: string;
+        }[];
+      };
+      get_member_watchlist: {
+        Args: { target_handle: string };
+        Returns: {
+          added_at: string;
+          poster_path: string;
+          release_year: number;
+          title: string;
+          tmdb_id: number;
+        }[];
+      };
+      get_profile: {
+        Args: { target_handle: string };
+        Returns: {
+          average_rating: number;
+          avatar_url: string;
+          display_name: string;
+          distribution: number[];
+          followers: number;
+          following: number;
+          handle: string;
+          is_private: boolean;
+          relationship: string;
+          visible: boolean;
+          watched_count: number;
+          watchlist_count: number;
+        }[];
+      };
       handle_available: { Args: { candidate: string }; Returns: boolean };
       respond_to_request: {
         Args: { approve: boolean; follower_handle: string };

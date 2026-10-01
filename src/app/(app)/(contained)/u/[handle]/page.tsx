@@ -1,48 +1,199 @@
 import { notFound } from 'next/navigation';
-import { Inbox, Settings } from 'lucide-react';
+import { Bookmark, Eye, Inbox, Lock, Settings } from 'lucide-react';
+import { Avatar } from '@/components/Avatar';
 import { ButtonLink } from '@/components/Button';
+import { EmptyState } from '@/components/EmptyState';
+import { FollowButton, type Relationship } from '@/components/FollowButton';
+import { PosterCard } from '@/components/PosterCard';
+import { PosterGrid } from '@/components/PosterGrid';
+import { ProfileStats } from '@/components/ProfileStats';
+import { Segmented } from '@/components/Segmented';
 import { getPendingRequestCount } from '@/lib/follows';
 import { createClient } from '@/lib/supabase/server';
-import { handleSchema } from '@/lib/validation';
+import { posterUrl } from '@/lib/tmdb';
+import { handleSchema, profileTabSchema } from '@/lib/validation';
 
 export default async function ProfilePage({
   params,
+  searchParams,
 }: PageProps<'/u/[handle]'>) {
   const handle = handleSchema.safeParse((await params).handle);
   if (!handle.success) notFound();
+  const tab = profileTabSchema.parse((await searchParams).tab);
 
-  // RLS returns only the signed-in user's own profile, so any other handle
-  // (including your old one after a rename) is a 404 until member profiles exist.
+  // Database functions return handles only, and films/stats only if you may see them.
   const supabase = await createClient();
   const { data: profile, error } = await supabase
-    .from('profiles')
-    .select('id, handle, display_name')
-    .eq('handle', handle.data)
+    .rpc('get_profile', { target_handle: handle.data })
     .maybeSingle();
   if (error) throw error;
   if (!profile) notFound();
-  const requests = await getPendingRequestCount(profile.id);
+
+  const own = profile.relationship === 'self';
+  const href = `/u/${profile.handle}`;
 
   return (
-    <section className="flex flex-col items-start gap-4">
-      <div>
-        <h1 className="text-title-lg">{profile.display_name}</h1>
-        <p className="text-body-sm text-muted">@{profile.handle}</p>
-      </div>
-      <p className="text-body-sm text-muted">
-        Your ratings and stats will appear here.
-      </p>
-      <div className="flex flex-wrap gap-2">
-        <ButtonLink href="/requests" icon={Inbox}>
-          Requests
-          {requests > 0 && (
-            <span className="text-muted">{requests > 9 ? '9+' : requests}</span>
-          )}
-        </ButtonLink>
-        <ButtonLink href="/settings" icon={Settings}>
-          Settings
-        </ButtonLink>
-      </div>
-    </section>
+    <>
+      <header className="flex flex-col gap-4 md:flex-row md:items-center">
+        <Avatar
+          name={profile.display_name}
+          url={profile.avatar_url}
+          size="lg"
+        />
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <h1 className="flex items-center gap-2 text-title-lg">
+            <span className="truncate">{profile.display_name}</span>
+            {profile.is_private && (
+              <Lock
+                size={16}
+                role="img"
+                aria-label="Private account"
+                className="flex-none text-muted"
+              />
+            )}
+          </h1>
+          <p className="text-body-sm text-muted">@{profile.handle}</p>
+          <p className="flex gap-4 text-body-sm text-muted">
+            <span>
+              <b className="text-ink">{profile.followers}</b> followers
+            </span>
+            <span>
+              <b className="text-ink">{profile.following}</b> following
+            </span>
+          </p>
+        </div>
+        {own ? (
+          <OwnActions />
+        ) : (
+          profile.visible && (
+            <FollowButton
+              handle={profile.handle}
+              isPrivate={profile.is_private}
+              initial={profile.relationship as Relationship}
+            />
+          )
+        )}
+      </header>
+
+      {profile.visible ? (
+        <>
+          <ProfileStats
+            watched={profile.watched_count}
+            average={
+              profile.average_rating === null
+                ? null
+                : Number(profile.average_rating)
+            }
+            distribution={profile.distribution}
+          />
+          <section className="flex flex-col gap-4">
+            <Segmented
+              label="Films"
+              options={[
+                {
+                  label: `Watched ${profile.watched_count}`,
+                  href,
+                  active: tab === 'watched',
+                },
+                {
+                  label: `Watchlist ${profile.watchlist_count}`,
+                  href: `${href}?tab=watchlist`,
+                  active: tab === 'watchlist',
+                },
+              ]}
+            />
+            <Films handle={profile.handle} tab={tab} own={own} />
+          </section>
+        </>
+      ) : (
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-line bg-surface px-6 py-12 text-center">
+          <span className="flex size-14 items-center justify-center rounded-full border border-line bg-raised text-muted">
+            <Lock size={24} aria-hidden />
+          </span>
+          <h2 className="text-title">This account is private</h2>
+          <p className="max-w-70 text-body-sm text-muted">
+            Follow @{profile.handle} to see their films and ratings. They’ll
+            need to approve your request.
+          </p>
+          <FollowButton
+            handle={profile.handle}
+            isPrivate
+            initial={profile.relationship as Relationship}
+          />
+        </div>
+      )}
+    </>
+  );
+}
+
+async function OwnActions() {
+  // RLS returns only your own profile; its id stays on the server.
+  const supabase = await createClient();
+  const { data: me } = await supabase.from('profiles').select('id').single();
+  const requests = me ? await getPendingRequestCount(me.id) : 0;
+  return (
+    <div className="flex flex-wrap gap-2">
+      <ButtonLink href="/requests" icon={Inbox}>
+        Requests
+        {requests > 0 && (
+          <span className="text-muted">{requests > 9 ? '9+' : requests}</span>
+        )}
+      </ButtonLink>
+      <ButtonLink href="/settings" icon={Settings}>
+        Settings
+      </ButtonLink>
+    </div>
+  );
+}
+
+async function Films({
+  handle,
+  tab,
+  own,
+}: {
+  handle: string;
+  tab: 'watched' | 'watchlist';
+  own: boolean;
+}) {
+  const supabase = await createClient();
+  const { data, error } =
+    tab === 'watched'
+      ? await supabase.rpc('get_member_watched', { target_handle: handle })
+      : await supabase.rpc('get_member_watchlist', { target_handle: handle });
+  if (error) throw error;
+
+  if (data.length === 0) {
+    return tab === 'watched' ? (
+      <EmptyState
+        icon={Eye}
+        title={
+          own
+            ? 'You haven’t watched anything yet'
+            : `@${handle} hasn’t watched anything yet`
+        }
+      />
+    ) : (
+      <EmptyState
+        icon={Bookmark}
+        title={
+          own ? 'Your watchlist is empty' : `@${handle}’s watchlist is empty`
+        }
+      />
+    );
+  }
+
+  return (
+    <PosterGrid>
+      {data.map((film) => (
+        <PosterCard
+          key={film.tmdb_id}
+          title={film.title}
+          year={film.release_year}
+          posterUrl={posterUrl(film.poster_path)}
+          href={`/movie/${film.tmdb_id}`}
+          rating={'rating' in film ? (film.rating ?? undefined) : undefined}
+        />
+      ))}
+    </PosterGrid>
   );
 }

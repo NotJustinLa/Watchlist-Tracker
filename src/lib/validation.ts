@@ -28,6 +28,10 @@ export const handleSchema = z
   .toLowerCase()
   .regex(/^[a-z0-9_]{3,20}$/, '3–20 characters: letters, numbers and _');
 
+export const profileTabSchema = z
+  .enum(['watched', 'watchlist'])
+  .catch('watched');
+
 export const settingsSchema = z.object({
   handle: handleSchema,
   displayName: z
