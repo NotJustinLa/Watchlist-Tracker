@@ -1,3 +1,11 @@
+/**
+ * Sign-in page (`/sign-in`).
+ *
+ * This is the front door. You pick Google, GitHub or Discord to sign in; there
+ * are no passwords. Behind the buttons sits a tilted wall of popular posters,
+ * which simply doesn't appear if the movie database is unavailable.
+ */
+
 import { CircleAlert } from 'lucide-react';
 import { Button } from '@/components/Button';
 import {
@@ -15,6 +23,10 @@ const providers = [
   { id: 'discord', name: 'Discord', Logo: DiscordLogo },
 ];
 
+/**
+ * Shows the logo, a one-line pitch, the three provider buttons and any sign-in
+ * error.
+ */
 export default async function SignInPage({
   searchParams,
 }: PageProps<'/sign-in'>) {

@@ -1,3 +1,13 @@
+/**
+ * The swipe deck on the Reels page.
+ *
+ * One full-screen card at a time, with the next one waiting behind it. Drag
+ * right (or tap the bookmark, or press the right arrow key) to save a film to
+ * your watchlist; drag left (or tap the cross, or press the left arrow key) to
+ * skip it. More films load as you get near the end, and films you skip don't
+ * come back during this visit.
+ */
+
 'use client';
 
 import Image from 'next/image';
@@ -39,8 +49,8 @@ const text = {
 };
 
 /**
- * Hinge-style deck: swipe the top card right to add it to your watchlist, left to
- * skip. Buttons and ←/→ do the same. Skips last for this visit only.
+ * Keeps your place in the deck, loads more films as you go, and saves the ones
+ * you swipe right on.
  */
 export function ReelDeck({ initial }: { initial: ReelItem[] }) {
   const [queue, setQueue] = useState(initial);
@@ -216,6 +226,12 @@ type CardProps = {
   onDecide?: (item: ReelItem, decision: Decision) => void;
 };
 
+/**
+ * One film card that you can drag.
+ *
+ * It tilts as you drag and fades in a Save or Skip stamp. Let go past the line
+ * (or flick it) and it flies off; otherwise it springs back to the middle.
+ */
 function Card({ item, isTop, onDecide }: CardProps) {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-300, 300], [-12, 12]);

@@ -1,3 +1,7 @@
+/**
+ * Your activity feed. Server only.
+ */
+
 import 'server-only';
 import { createClient } from './supabase/server';
 import { posterUrl } from './tmdb';
@@ -16,7 +20,9 @@ export type FeedEvent = {
   at: string;
 };
 
-/** A page of activity from people you follow, older than `before` (an ISO time). */
+/**
+ * One page of activity from the people you follow, older than the given time.
+ */
 export async function getFeed(before?: string): Promise<FeedEvent[]> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc('get_feed', {

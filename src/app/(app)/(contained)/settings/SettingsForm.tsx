@@ -1,3 +1,11 @@
+/**
+ * The settings form.
+ *
+ * As you type a new handle it tells you straight away whether it's the right
+ * format and whether someone else already has it. Saving works even without
+ * JavaScript.
+ */
+
 'use client';
 
 import { useActionState, useEffect, useState } from 'react';
@@ -13,6 +21,10 @@ type Status = { tone: 'positive' | 'negative' | null; text: string };
 const inputClass =
   'h-11 w-full rounded-md border border-line-strong bg-raised px-3 text-body transition-colors focus-visible:border-accent focus-visible:outline-offset-1 aria-invalid:border-negative';
 
+/**
+ * The small line of help or feedback under a field, in green for good news and
+ * red for problems.
+ */
 function Help({ id, status }: { id: string; status: Status }) {
   const Icon =
     status.tone === 'positive' ? CircleCheck : status.tone ? CircleAlert : null;
@@ -29,7 +41,10 @@ function Help({ id, status }: { id: string; status: Status }) {
   );
 }
 
-/** Live format + availability feedback for the handle field. */
+/**
+ * Works out what to say under the handle field: a format problem, "Checking…",
+ * available or taken.
+ */
 function useHandleStatus(value: string, current: string): Status {
   const [availability, setAvailability] = useState<{
     handle: string;
@@ -69,6 +84,10 @@ function useHandleStatus(value: string, current: string): Status {
     : { tone: 'negative', text: 'That handle is taken' };
 }
 
+/**
+ * Your display name, handle and privacy switch, with a Save button that tells
+ * you how it went.
+ */
 export function SettingsForm({ profile }: { profile: Profile }) {
   const [state, formAction, saving] = useActionState<SettingsState, FormData>(
     updateSettings,

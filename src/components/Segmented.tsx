@@ -1,3 +1,7 @@
+/**
+ * The row of pill-shaped options used for sorting and filtering.
+ */
+
 import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
 
@@ -10,7 +14,10 @@ type Option = {
   ariaLabel?: string;
 };
 
-// URL-driven segmented control: each option is a link, the current one is marked.
+/**
+ * Each option is a link to a different address, so sorts and filters survive a
+ * refresh and can be shared.
+ */
 export function Segmented({
   label,
   options,

@@ -1,3 +1,7 @@
+/**
+ * The list of follow requests, with Approve and Decline on each.
+ */
+
 'use client';
 
 import { useState, useTransition } from 'react';
@@ -10,8 +14,8 @@ import { respondToRequest } from '@/app/(app)/follow-actions';
 type Person = { handle: string; displayName: string; avatarUrl: string | null };
 
 /**
- * Keeps the rows it was first given: after Approve/Decline the page refreshes
- * (for the badge count), but answered rows stay with a note until you leave.
+ * Shows each request. Answered rows stay in place with a quiet "Approved" or
+ * "Declined", so the list doesn't jump under your finger.
  */
 export function RequestList({ requests }: { requests: Person[] }) {
   const [rows] = useState(requests);
@@ -33,6 +37,9 @@ export function RequestList({ requests }: { requests: Person[] }) {
   );
 }
 
+/**
+ * One person asking to follow you, with Decline and Approve buttons.
+ */
 function RequestRow({ person }: { person: Person }) {
   const [pending, startTransition] = useTransition();
   const [outcome, setOutcome] = useState<'approved' | 'declined' | 'failed'>();

@@ -1,3 +1,7 @@
+/**
+ * The Add to watchlist button on each Taste recommendation.
+ */
+
 'use client';
 
 import { useOptimistic, useState, useTransition } from 'react';
@@ -5,6 +9,10 @@ import { Bookmark, BookmarkCheck } from 'lucide-react';
 import { Button } from '@/components/Button';
 import { setOnWatchlist } from '@/app/(app)/movie/[id]/actions';
 
+/**
+ * Saves the recommended film to your watchlist (or removes it), updating
+ * instantly and undoing itself if saving fails.
+ */
 export function WatchlistToggle({
   tmdbId,
   on,

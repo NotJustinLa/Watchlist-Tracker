@@ -1,3 +1,10 @@
+/**
+ * Loading state for Reels.
+ */
+
+/**
+ * A card-shaped placeholder where the first film will appear.
+ */
 export default function Loading() {
   return (
     <div className="fixed inset-x-0 top-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] md:top-16 md:bottom-0">

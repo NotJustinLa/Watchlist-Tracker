@@ -1,3 +1,10 @@
+/**
+ * Reels API (`GET /api/reels?page=n`).
+ *
+ * The swipe deck calls this for its next batch of films as you get near the
+ * end.
+ */
+
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { requireUserOr401 } from '@/lib/auth';
@@ -9,7 +16,9 @@ const pageSchema = z.coerce
   .min(1)
   .max(REEL_PAGES - 1);
 
-// GET /api/reels?page=n -> { items }: the next batch of the Reels feed.
+/**
+ * Returns the next batch of recommended films, or 400 for a bad page number.
+ */
 export async function GET(request: NextRequest) {
   const session = await requireUserOr401();
   if (session instanceof NextResponse) return session;

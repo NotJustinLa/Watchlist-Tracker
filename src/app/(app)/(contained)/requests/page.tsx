@@ -1,6 +1,16 @@
+/**
+ * Follow requests page (`/requests`).
+ *
+ * If your profile is private, people who want to follow you wait here until you
+ * approve or decline them.
+ */
+
 import { createClient } from '@/lib/supabase/server';
 import { RequestList } from './RequestList';
 
+/**
+ * Loads who's waiting for your approval and shows the list.
+ */
 export default async function RequestsPage() {
   const supabase = await createClient();
   const { data: requests, error } = await supabase.rpc('get_follow_requests');

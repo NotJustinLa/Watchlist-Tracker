@@ -1,5 +1,15 @@
+/**
+ * Loading state for the movie page.
+ *
+ * You see placeholders in the shape of the backdrop, poster, title and overview
+ * while the film loads.
+ */
+
 import { Skeleton } from '@/components/Skeleton';
 
+/**
+ * Placeholder backdrop, poster and text lines.
+ */
 export default function Loading() {
   return (
     <div role="status" aria-label="Loading film">

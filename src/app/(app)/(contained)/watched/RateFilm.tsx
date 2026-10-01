@@ -1,9 +1,17 @@
+/**
+ * The small stars under each poster on your Watched page.
+ */
+
 'use client';
 
 import { useOptimistic, useState, useTransition } from 'react';
 import { StarRating, type Rating } from '@/components/StarRating';
 import { rateMovie } from '@/app/(app)/movie/[id]/actions';
 
+/**
+ * Lets you rate (or clear) a film right in the grid. The stars change instantly
+ * and undo themselves if saving fails.
+ */
 export function RateFilm({
   tmdbId,
   title,

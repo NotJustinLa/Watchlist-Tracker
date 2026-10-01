@@ -1,3 +1,7 @@
+/**
+ * Grey placeholder shapes shown while content loads.
+ */
+
 import { PosterGrid } from './PosterGrid';
 
 const radii = {
@@ -13,6 +17,10 @@ type SkeletonProps = {
   rounded?: keyof typeof radii;
 };
 
+/**
+ * One gently pulsing grey block. The pulse stops if you've asked your device
+ * for less motion.
+ */
 export function Skeleton({ className = '', rounded = 'sm' }: SkeletonProps) {
   return (
     <div
@@ -24,6 +32,10 @@ export function Skeleton({ className = '', rounded = 'sm' }: SkeletonProps) {
 
 const titleWidths = ['w-4/5', 'w-3/5', 'w-11/12', 'w-2/3'];
 
+/**
+ * A whole grid of poster outlines, with title lines of different lengths so it
+ * doesn't look like a table.
+ */
 export function PosterGridSkeleton({ count = 12 }: { count?: number }) {
   return (
     <div role="status" aria-label="Loading films">

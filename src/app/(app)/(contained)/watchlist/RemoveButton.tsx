@@ -1,3 +1,7 @@
+/**
+ * The cross in the corner of a watchlist poster.
+ */
+
 'use client';
 
 import { useState, useTransition } from 'react';
@@ -5,6 +9,10 @@ import { CircleAlert, X } from 'lucide-react';
 import { Button } from '@/components/Button';
 import { setOnWatchlist } from '@/app/(app)/movie/[id]/actions';
 
+/**
+ * Takes the film off your watchlist. It spins while working and shows a warning
+ * if it fails.
+ */
 export function RemoveButton({
   tmdbId,
   title,

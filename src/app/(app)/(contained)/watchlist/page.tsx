@@ -1,3 +1,10 @@
+/**
+ * Watchlist page (`/watchlist`).
+ *
+ * Every film you've saved to watch later, as a poster grid. Sort by date added
+ * or by title, and remove films with the cross on each poster.
+ */
+
 import { Bookmark, Search } from 'lucide-react';
 import { ButtonLink } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
@@ -10,6 +17,10 @@ import { posterUrl } from '@/lib/tmdb';
 import { watchlistSortSchema } from '@/lib/validation';
 import { RemoveButton } from './RemoveButton';
 
+/**
+ * Loads your saved films (newest first, or A to Z) and shows them with remove
+ * buttons.
+ */
 export default async function WatchlistPage({
   searchParams,
 }: PageProps<'/watchlist'>) {

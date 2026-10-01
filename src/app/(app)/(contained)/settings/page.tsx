@@ -1,7 +1,17 @@
+/**
+ * Settings page (`/settings`).
+ *
+ * Change your display name and handle, make your profile private or public, and
+ * sign out.
+ */
+
 import { SignOutButton } from '@/components/SignOutButton';
 import { createClient } from '@/lib/supabase/server';
 import { SettingsForm } from './SettingsForm';
 
+/**
+ * Loads your current settings and shows the form.
+ */
 export default async function SettingsPage() {
   // RLS returns only the signed-in user's profile.
   const supabase = await createClient();

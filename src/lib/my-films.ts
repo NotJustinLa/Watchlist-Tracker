@@ -1,8 +1,12 @@
+/**
+ * Your own status for films on screen.
+ */
+
 import { createClient } from './supabase/server';
 
 /**
- * The signed-in user's watched status (with rating, if any) and watchlist status
- * for the given films, in one query per table. RLS limits both to the user's own rows.
+ * For a set of films, which you've watched (and your rating) and which are on
+ * your watchlist, in one query per table.
  */
 export async function getMyFilmStates(tmdbIds: number[]) {
   if (tmdbIds.length === 0) {

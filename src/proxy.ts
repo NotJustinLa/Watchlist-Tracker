@@ -1,8 +1,21 @@
+/**
+ * Proxy: runs before every page request (Next 16's name for middleware).
+ *
+ * It does two jobs. It keeps your login fresh by renewing your session before
+ * it expires, and it sends you to the sign-in page if you try to open the app
+ * while signed out. Sign-in, the login callback and the API routes are left
+ * alone: the API answers signed-out requests with a 401 itself.
+ */
+
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 const publicPaths = ['/sign-in', '/auth/', '/api/'];
 
+/**
+ * Refreshes your session, then redirects you to sign-in (or home) if you're on
+ * the wrong side of the door.
+ */
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 

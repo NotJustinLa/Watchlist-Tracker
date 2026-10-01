@@ -1,9 +1,18 @@
+/**
+ * Feed API (`GET /api/feed?before=<time>`).
+ *
+ * The Feed's Load more button calls this for the next 20 pieces of activity.
+ */
+
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { requireUserOr401 } from '@/lib/auth';
 import { getFeed } from '@/lib/feed';
 
-// GET /api/feed?before=<ISO time> -> { events }: the next page of the activity feed.
+/**
+ * Returns the activity older than the given time, or 400 if the time isn't
+ * valid.
+ */
 export async function GET(request: NextRequest) {
   const session = await requireUserOr401();
   if (session instanceof NextResponse) return session;

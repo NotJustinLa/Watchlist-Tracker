@@ -1,3 +1,11 @@
+/**
+ * The main navigation.
+ *
+ * On your phone it's a bar along the bottom; on a bigger screen it's a bar
+ * across the top with the Reel logo and a sign-out icon. The tab for where you
+ * are lights up, and a small badge on Profile shows waiting follow requests.
+ */
+
 'use client';
 
 import Link from 'next/link';
@@ -16,6 +24,12 @@ import { SignOutButton } from './SignOutButton';
 type NavId =
   'search' | 'reels' | 'feed' | 'watchlist' | 'watched' | 'taste' | 'profile';
 
+/**
+ * Decides which tab to light up for the page you're on.
+ *
+ * Pages that aren't tabs borrow their parent's tab: someone else's profile
+ * counts as Feed (you reach it from Discover), and Settings counts as Profile.
+ */
 function activeTab(pathname: string, profileHref: string): NavId {
   // Other members' profiles are reached from Discover, so they sit under Feed.
   const otherProfile = pathname.startsWith('/u/') && pathname !== profileHref;
@@ -34,6 +48,10 @@ function activeTab(pathname: string, profileHref: string): NavId {
   return 'search';
 }
 
+/**
+ * Renders the phone and desktop versions of the nav; CSS shows the right one
+ * for your screen.
+ */
 export function AppNav({
   profileHref,
   requests,

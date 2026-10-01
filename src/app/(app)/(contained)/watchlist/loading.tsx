@@ -1,5 +1,12 @@
+/**
+ * Loading state for your watchlist.
+ */
+
 import { PosterGridSkeleton, Skeleton } from '@/components/Skeleton';
 
+/**
+ * A heading placeholder and a grid of poster outlines.
+ */
 export default function Loading() {
   return (
     <>

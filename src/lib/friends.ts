@@ -1,3 +1,7 @@
+/**
+ * Which of the people you follow have watched which films.
+ */
+
 import { z } from 'zod';
 import { createClient } from './supabase/server';
 import { tmdbIdSchema } from './validation';
@@ -12,8 +16,11 @@ export type Friend = {
 const BATCH = 60;
 
 /**
- * People you follow (approved) who watched each of the given films. One query per
- * 60 films (the database function's cap), so a normal grid is a single query.
+ * For a set of films, who you follow has watched each one, and what they rated
+ * it.
+ *
+ * Only approved follows count. A normal grid is a single query; very long lists
+ * are split into chunks of 60.
  */
 export async function getFriendsWhoWatched(tmdbIds: number[]) {
   const friends = new Map<number, Friend[]>();

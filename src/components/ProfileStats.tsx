@@ -1,3 +1,7 @@
+/**
+ * The stats card on a profile.
+ */
+
 type ProfileStatsProps = {
   watched: number;
   /** Average of rated films, or null if none are rated. */
@@ -6,7 +10,13 @@ type ProfileStatsProps = {
   distribution: number[];
 };
 
-/** Films watched, average rating and a five-bar rating distribution. Bars are data, so no yellow. */
+/**
+ * Films watched, average rating and a small chart of how many films got each
+ * star rating.
+ *
+ * The bars are grey and white, not yellow, because they're data rather than a
+ * rating.
+ */
 export function ProfileStats({
   watched,
   average,

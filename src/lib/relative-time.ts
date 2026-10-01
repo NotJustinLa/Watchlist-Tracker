@@ -1,8 +1,15 @@
+/**
+ * Friendly times like "2h ago".
+ */
+
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-/** "Just now", "5m ago", "2h ago", "Yesterday", "3d ago", then "Mar 2024". */
+/**
+ * Turns a timestamp into "Just now", "5m ago", "2h ago", "Yesterday", "3d ago",
+ * and after a week a month and year like "Mar 2024".
+ */
 export function relativeTime(iso: string, now = Date.now()) {
   const ago = now - Date.parse(iso);
   if (ago < MINUTE) return 'Just now';

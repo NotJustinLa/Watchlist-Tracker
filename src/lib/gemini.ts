@@ -1,3 +1,7 @@
+/**
+ * Everything that talks to Gemini, Google's AI. Server only.
+ */
+
 import 'server-only';
 import { GoogleGenAI } from '@google/genai';
 import { z } from 'zod';
@@ -23,7 +27,14 @@ const ai = new GoogleGenAI({
 
 const responseJsonSchema = z.toJSONSchema(tasteResponseSchema);
 
-/** Asks Gemini for a taste summary and recommendations. `history` is sorted by rating. */
+/**
+ * Asks Gemini to describe your taste and suggest a few films, based on your
+ * ratings.
+ *
+ * Gemini is told exactly what shape of answer to give, and the answer is
+ * checked again here anyway, because an AI's output is never trusted as-is.
+ * Busy moments on Google's side are retried automatically.
+ */
 export async function generateTasteProfile(
   history: RatedFilm[],
 ): Promise<TasteResponse> {

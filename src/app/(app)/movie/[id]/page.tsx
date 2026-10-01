@@ -1,3 +1,12 @@
+/**
+ * Movie page (`/movie/<id>`).
+ *
+ * Everything about one film: a wide backdrop, the poster, title, year, runtime
+ * and genres, the overview, your own watchlist and watched buttons, and which
+ * of the people you follow have watched it. A bad or unknown id shows the
+ * not-found page.
+ */
+
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Users } from 'lucide-react';
@@ -12,6 +21,10 @@ import { getMovie } from '@/lib/tmdb';
 import { tmdbIdParamSchema } from '@/lib/validation';
 import { MovieActions } from './MovieActions';
 
+/**
+ * Loads the film from TMDB plus your own status and your friends' ratings, then
+ * lays out the page.
+ */
 export default async function MoviePage({ params }: PageProps<'/movie/[id]'>) {
   const id = tmdbIdParamSchema.safeParse((await params).id);
   if (!id.success) notFound();

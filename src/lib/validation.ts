@@ -1,3 +1,10 @@
+/**
+ * Every rule for checking input, in one place.
+ *
+ * Search text, film ids, ratings, handles, settings, sort options and the AI's
+ * answers are all checked against these before anything is trusted.
+ */
+
 import { z } from 'zod';
 
 export const searchQuerySchema = z.string().trim().max(100).catch('');

@@ -1,3 +1,13 @@
+/**
+ * Watchlist, watched and rating actions.
+ *
+ * These run on the server whenever you save, watch or rate a film, from any
+ * page. Each one checks you're signed in, checks the input, and only ever
+ * touches your own rows. Problems you can fix (bad input, an unknown film,
+ * rating something you haven't marked watched) come back as a message; real
+ * server failures throw.
+ */
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -12,8 +22,13 @@ import {
   type ActionError,
 } from '@/lib/validation';
 
-// Upserts the display snapshot from TMDB so rows referencing this film have a
-// `movies` row. False if TMDB has no such film.
+/**
+ * Stores a small copy of the film (title, poster, year, genres) so lists and
+ * feeds don't need to call TMDB.
+ *
+ * The details always come from TMDB on the server, never from your browser, so
+ * nobody can plant a fake title. Returns false if TMDB has no such film.
+ */
 async function saveMovieSnapshot(tmdbId: number) {
   const movie = await getMovieSnapshot(tmdbId);
   if (!movie) return false;
@@ -32,6 +47,9 @@ const filmNotFound: ActionError = { error: 'Film not found.' };
 
 type Session = Awaited<ReturnType<typeof requireUser>>;
 
+/**
+ * Removes one of your own rows (from Watched or your watchlist) for a film.
+ */
 async function deleteOwnRow(
   { user, supabase }: Session,
   table: 'watched' | 'watchlist_items',
@@ -45,6 +63,12 @@ async function deleteOwnRow(
   if (error) throw error;
 }
 
+/**
+ * Puts a film on your watchlist, or takes it off.
+ *
+ * You say which you want rather than toggling, so a double tap can't flip it
+ * back.
+ */
 export async function setOnWatchlist(
   tmdbId: number,
   onWatchlist: boolean,
@@ -70,7 +94,12 @@ export async function setOnWatchlist(
   revalidatePath('/', 'layout');
 }
 
-// Marking watched takes the film off the watchlist. Unmarking also drops its rating.
+/**
+ * Marks a film as watched, or unmarks it.
+ *
+ * Marking it watched takes it off your watchlist. Unmarking it also clears your
+ * rating.
+ */
 export async function setWatched(
   tmdbId: number,
   watched: boolean,
@@ -97,7 +126,12 @@ export async function setWatched(
   revalidatePath('/', 'layout');
 }
 
-// Sets (1-5) or clears (null) the rating of a film already marked watched.
+/**
+ * Gives a watched film 1 to 5 stars, or clears the rating if you pass null.
+ *
+ * Only works for films you've already marked watched, and keeps the date you
+ * first watched it.
+ */
 export async function rateMovie(
   tmdbId: number,
   rating: number | null,

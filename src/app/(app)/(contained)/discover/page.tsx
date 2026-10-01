@@ -1,3 +1,10 @@
+/**
+ * Discover page (`/discover`).
+ *
+ * Find people by name or @handle and follow them. Private accounts get a follow
+ * request instead. Like film search, what you type goes into the address bar.
+ */
+
 import { Suspense } from 'react';
 import { SearchX, Users } from 'lucide-react';
 import { EmptyState } from '@/components/EmptyState';
@@ -8,6 +15,9 @@ import { UserChip } from '@/components/UserChip';
 import { createClient } from '@/lib/supabase/server';
 import { memberQuerySchema } from '@/lib/validation';
 
+/**
+ * Shows the search box and the matching members below it.
+ */
 export default async function DiscoverPage({
   searchParams,
 }: PageProps<'/discover'>) {
@@ -30,6 +40,10 @@ export default async function DiscoverPage({
   );
 }
 
+/**
+ * Looks up members matching your search and shows each with a Follow button (or
+ * "You" for yourself).
+ */
 async function Members({ query }: { query: string }) {
   if (!query) {
     return (
@@ -95,6 +109,9 @@ async function Members({ query }: { query: string }) {
   );
 }
 
+/**
+ * Placeholder member rows, shown while a search is running.
+ */
 function MemberSkeletons() {
   return (
     <div

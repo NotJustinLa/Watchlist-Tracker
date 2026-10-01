@@ -1,3 +1,7 @@
+/**
+ * The save action behind the Settings form.
+ */
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -14,6 +18,13 @@ export type SettingsState = {
 
 const UNIQUE_VIOLATION = '23505';
 
+/**
+ * Saves your display name, handle and privacy setting.
+ *
+ * It checks everything first and only touches your own profile. If someone
+ * grabs the handle a moment before you save, the database refuses the duplicate
+ * and you see "That handle is taken" under the field.
+ */
 export async function updateSettings(
   _previous: SettingsState,
   formData: FormData,

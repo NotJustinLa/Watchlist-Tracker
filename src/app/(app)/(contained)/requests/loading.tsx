@@ -1,5 +1,12 @@
+/**
+ * Loading state for follow requests.
+ */
+
 import { Skeleton } from '@/components/Skeleton';
 
+/**
+ * Placeholder rows with avatars.
+ */
 export default function Loading() {
   return (
     <div

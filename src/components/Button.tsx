@@ -1,3 +1,10 @@
+/**
+ * The one button style used across the whole app.
+ *
+ * Charcoal at rest, yellow with dark text when you hover, press or tab to it.
+ * There is also a link version, for buttons that take you to another page.
+ */
+
 import type { ComponentProps } from 'react';
 import Link from 'next/link';
 import { LoaderCircle, type LucideIcon } from 'lucide-react';
@@ -23,6 +30,10 @@ const sizes = {
 
 const padding = { sm: 'px-3', md: 'px-4', lg: 'px-4' };
 
+/**
+ * Builds the shared class list so the button and link versions can never drift
+ * apart.
+ */
 function classes(
   { variant = 'default', size = 'md', iconOnly = false }: Look,
   on: boolean | undefined,
@@ -38,6 +49,10 @@ type ButtonProps = ComponentProps<'button'> &
     loading?: boolean;
   };
 
+/**
+ * A button, optionally with an icon, a spinner while loading, or a toggled "on"
+ * look.
+ */
 export function Button({
   variant,
   size,
@@ -72,7 +87,9 @@ export function Button({
   );
 }
 
-/** A link that looks like a Button, for actions that navigate. */
+/**
+ * A link that looks exactly like a Button, for actions that take you somewhere.
+ */
 export function ButtonLink({
   variant,
   size,

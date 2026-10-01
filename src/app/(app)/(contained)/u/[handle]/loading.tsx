@@ -1,5 +1,12 @@
+/**
+ * Loading state for a profile.
+ */
+
 import { Skeleton } from '@/components/Skeleton';
 
+/**
+ * Placeholders for the name and handle.
+ */
 export default function Loading() {
   return (
     <div

@@ -1,3 +1,12 @@
+/**
+ * The action card on a movie page.
+ *
+ * Two buttons: Add to watchlist, and Mark as watched. Once a film is watched
+ * you see your rating here (or a nudge to rate it on your Watched page). Taps
+ * update instantly and quietly undo themselves, with a message, if saving
+ * fails.
+ */
+
 'use client';
 
 import Link from 'next/link';
@@ -10,6 +19,12 @@ import { setOnWatchlist, setWatched } from './actions';
 
 type State = { watched: boolean; rating: Rating; onWatchlist: boolean };
 
+/**
+ * Your watchlist and watched toggles for this film.
+ *
+ * Marking a film watched also takes it off your watchlist; unmarking it removes
+ * your rating too. Both changes show straight away, before the server confirms.
+ */
 export function MovieActions({ tmdbId, ...saved }: State & { tmdbId: number }) {
   const [state, setOptimistic] = useOptimistic(saved);
   const [, startTransition] = useTransition();

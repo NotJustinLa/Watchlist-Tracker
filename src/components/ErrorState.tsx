@@ -1,3 +1,7 @@
+/**
+ * What a page shows when it couldn't load.
+ */
+
 'use client';
 
 import { useTransition } from 'react';
@@ -10,6 +14,10 @@ type ErrorStateProps = {
   body?: string;
 };
 
+/**
+ * A red icon, what went wrong, and a Try again button that shows it's working
+ * while it retries.
+ */
 export function ErrorState({
   onRetry,
   title = 'Couldn’t load films',

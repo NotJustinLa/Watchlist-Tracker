@@ -1,3 +1,7 @@
+/**
+ * What a list shows when there's nothing in it yet.
+ */
+
 import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -8,6 +12,10 @@ type EmptyStateProps = {
   action?: ReactNode;
 };
 
+/**
+ * An icon, a short title, a sentence of help and at most one button pointing
+ * you to where to fix it.
+ */
 export function EmptyState({
   icon: Icon,
   title,

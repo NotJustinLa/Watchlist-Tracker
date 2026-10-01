@@ -1,5 +1,12 @@
+/**
+ * Loading state for Settings.
+ */
+
 import { Skeleton } from '@/components/Skeleton';
 
+/**
+ * Placeholders for the form fields.
+ */
 export default function Loading() {
   return (
     <div

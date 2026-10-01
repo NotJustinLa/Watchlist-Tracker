@@ -1,6 +1,13 @@
+/**
+ * Loading state for the Taste page.
+ */
+
 import { Skeleton } from '@/components/Skeleton';
 import { RecommendationSkeletons } from './TasteGenerator';
 
+/**
+ * Placeholders for the summary card and the recommendation rows.
+ */
 export default function Loading() {
   return (
     <>

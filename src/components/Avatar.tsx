@@ -1,7 +1,14 @@
+/**
+ * A person's round avatar.
+ */
+
 import Image from 'next/image';
 
 const sizes = { xs: 20, md: 40, lg: 88 };
 
+/**
+ * Takes up to the first two initials of a name, like "MC" for Maya Chen.
+ */
 function initials(name: string) {
   return name
     .split(/\s+/)
@@ -10,7 +17,10 @@ function initials(name: string) {
     .join('');
 }
 
-/** A round photo, or initials on the raised surface. Decorative: names are shown beside it. */
+/**
+ * Shows their profile photo, or their initials if they don't have one. Comes in
+ * three sizes.
+ */
 export function Avatar({
   name,
   url,

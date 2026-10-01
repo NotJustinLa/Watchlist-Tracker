@@ -1,3 +1,7 @@
+/**
+ * The list of activity on the Feed page, with its Load more button.
+ */
+
 'use client';
 
 import Link from 'next/link';
@@ -9,7 +13,10 @@ import { StarRating, type Rating } from '@/components/StarRating';
 import type { FeedEvent } from '@/lib/feed';
 import { relativeTime } from '@/lib/relative-time';
 
-/** Feed rows with a "Load more" button that pages back through time. */
+/**
+ * Shows the activity you've loaded so far and fetches the next 20 when you
+ * press Load more.
+ */
 export function FeedList({
   initial,
   pageSize,
@@ -64,6 +71,10 @@ export function FeedList({
   );
 }
 
+/**
+ * One line of activity, such as "@maya watched Past Lives (5 stars), 2h ago",
+ * with the poster beside it.
+ */
 function FeedItem({ event }: { event: FeedEvent }) {
   const movieHref = `/movie/${event.tmdbId}`;
   return (

@@ -1,9 +1,20 @@
+/**
+ * Feed page (`/feed`).
+ *
+ * What the people you follow have been up to: films they watched (with their
+ * stars) and films they added to their watchlist, newest first. If you don't
+ * follow anyone yet, you're pointed to Discover.
+ */
+
 import { UserPlus, Users } from 'lucide-react';
 import { ButtonLink } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
 import { FEED_PAGE_SIZE, getFeed } from '@/lib/feed';
 import { FeedList } from './FeedList';
 
+/**
+ * Loads the first page of activity, or shows the empty state if there's none.
+ */
 export default async function FeedPage() {
   const events = await getFeed();
 

@@ -1,8 +1,15 @@
+/**
+ * Makes the dotted background glow around your mouse.
+ */
+
 'use client';
 
 import { useEffect } from 'react';
 
-// Feeds the pointer position to the background grid glow in globals.css.
+/**
+ * Tracks your pointer and hands its position to the background, at most once
+ * per frame. It draws nothing itself.
+ */
 export function PointerGlow() {
   useEffect(() => {
     const style = document.documentElement.style;

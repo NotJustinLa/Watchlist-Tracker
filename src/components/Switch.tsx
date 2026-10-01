@@ -1,3 +1,7 @@
+/**
+ * An on/off switch.
+ */
+
 'use client';
 
 type SwitchProps = {
@@ -7,7 +11,10 @@ type SwitchProps = {
   describedBy?: string;
 };
 
-// On/off toggle. Checked fills with ink (not accent: yellow stays reserved).
+/**
+ * A toggle like the Private profile setting. When on it fills white, not
+ * yellow, which is kept for highlights.
+ */
 export function Switch({ checked, onChange, label, describedBy }: SwitchProps) {
   return (
     <button

@@ -1,3 +1,7 @@
+/**
+ * A person shown as a row: avatar, name and @handle.
+ */
+
 import Link from 'next/link';
 import { Lock } from 'lucide-react';
 import { Avatar } from './Avatar';
@@ -10,7 +14,10 @@ type Person = {
   isPrivate?: boolean;
 };
 
-/** Avatar, display name and @handle as one unit, linking to the member's profile. */
+/**
+ * Links to their profile, and shows a lock after the name if their account is
+ * private.
+ */
 export function UserChip({ person }: { person: Person }) {
   return (
     <Link

@@ -1,3 +1,11 @@
+/**
+ * Watched page (`/watched`).
+ *
+ * Every film you've marked watched, with stars under each poster so you can
+ * rate them right here. Sort by recent, rating or title, and filter by star
+ * count or show only the films you haven't rated yet.
+ */
+
 import { CircleCheck, Eye, Search, Star } from 'lucide-react';
 import { ButtonLink } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
@@ -15,6 +23,10 @@ const sortLabels = { recent: 'Recent', rating: 'Rating', title: 'Title' };
 type Sort = keyof typeof sortLabels;
 type Filter = number | 'unrated' | undefined;
 
+/**
+ * Builds the page address for a sort and filter, leaving out the defaults so
+ * links stay tidy.
+ */
 function watchedHref(sort: Sort, stars?: Filter) {
   const params = new URLSearchParams();
   if (sort !== 'recent') params.set('sort', sort);
@@ -23,6 +35,10 @@ function watchedHref(sort: Sort, stars?: Filter) {
   return query ? `/watched?${query}` : '/watched';
 }
 
+/**
+ * Loads your watched films, applies your sort and filter, and shows each with a
+ * rating control.
+ */
 export default async function WatchedPage({
   searchParams,
 }: PageProps<'/watched'>) {

@@ -1,6 +1,12 @@
+/**
+ * Follow request helpers.
+ */
+
 import { createClient } from './supabase/server';
 
-/** Pending follow requests waiting on `userId` (the signed-in user's own id). */
+/**
+ * How many people are waiting for you to approve their follow request.
+ */
 export async function getPendingRequestCount(userId: string) {
   const supabase = await createClient();
   const { count, error } = await supabase

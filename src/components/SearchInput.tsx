@@ -1,3 +1,7 @@
+/**
+ * The search box used on Search and Discover.
+ */
+
 'use client';
 
 import { useRef, useState } from 'react';
@@ -12,6 +16,10 @@ type SearchInputProps = {
   placeholder?: string;
 };
 
+/**
+ * Puts what you type into the address bar a moment after you stop typing, so
+ * the page can show results.
+ */
 export function SearchInput({
   defaultValue,
   path = '/',

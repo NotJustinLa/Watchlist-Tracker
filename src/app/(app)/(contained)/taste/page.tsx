@@ -1,3 +1,12 @@
+/**
+ * Taste page (`/taste`).
+ *
+ * Your AI taste profile: a short read on what you like and a few films picked
+ * for you, each with a reason that points back at films you rated. You need at
+ * least five rated films first; until then the page shows how many more you
+ * need.
+ */
+
 import Link from 'next/link';
 import { Eye, SearchX, Sparkles } from 'lucide-react';
 import { ButtonLink } from '@/components/Button';
@@ -10,6 +19,9 @@ import { storedRecommendationsSchema } from '@/lib/validation';
 import { TasteGenerator } from './TasteGenerator';
 import { WatchlistToggle } from './WatchlistToggle';
 
+/**
+ * Shows your saved profile and picks, or the progress towards your first one.
+ */
 export default async function TastePage() {
   // RLS limits both reads to the signed-in user's own rows.
   const supabase = await createClient();

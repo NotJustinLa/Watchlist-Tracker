@@ -1,3 +1,7 @@
+/**
+ * The summary card on the Taste page, with its Generate / Regenerate button.
+ */
+
 'use client';
 
 import { useState, useTransition, type ReactNode } from 'react';
@@ -9,7 +13,14 @@ import { Skeleton } from '@/components/Skeleton';
 
 type Profile = { summary: string; ratingCount: number; newRatings: number };
 
-/** The summary card and its Generate/Regenerate flow; `children` are the recommendations. */
+/**
+ * Shows your taste summary and asks the server for a new one when you press the
+ * button.
+ *
+ * While it's thinking you see a calm "Thinking about your ratings…" and
+ * placeholder picks. If it fails you get a message and a way to try again; if
+ * you pressed it too recently you're told to wait a minute.
+ */
 export function TasteGenerator({
   profile,
   children,
@@ -106,6 +117,9 @@ export function TasteGenerator({
   );
 }
 
+/**
+ * Three placeholder recommendation rows, shown while picks are loading.
+ */
 export function RecommendationSkeletons() {
   return (
     <div

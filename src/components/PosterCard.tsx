@@ -1,3 +1,7 @@
+/**
+ * Film posters as they appear in grids.
+ */
+
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
@@ -11,6 +15,10 @@ type PosterProps = {
   className?: string;
 };
 
+/**
+ * Just the poster image in its rounded frame, or a film icon if the film has no
+ * poster.
+ */
 export function Poster({ url, sizes, priority, className = '' }: PosterProps) {
   return (
     <div
@@ -52,6 +60,13 @@ type PosterCardProps = {
   footer?: ReactNode;
 };
 
+/**
+ * A poster with its title and year, linking to the film.
+ *
+ * It can also show your rating, a watchlist mark, a stack of friends who
+ * watched it, a button in the corner (like remove) and something underneath
+ * (like stars).
+ */
 export function PosterCard({
   title,
   year,

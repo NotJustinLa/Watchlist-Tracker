@@ -1,3 +1,12 @@
+/**
+ * Taste API (`POST /api/taste`).
+ *
+ * The Taste page calls this when you press Generate or Regenerate. It reads
+ * your rated films, asks Gemini for a summary and some picks, checks every pick
+ * is a real film you haven't seen, and saves the result. You can only
+ * regenerate once a minute, which protects the AI key from being hammered.
+ */
+
 import { NextResponse } from 'next/server';
 import { requireUserOr401 } from '@/lib/auth';
 import { generateTasteProfile, MIN_RATINGS } from '@/lib/gemini';
@@ -5,9 +14,15 @@ import { searchMovies } from '@/lib/tmdb';
 
 const COOLDOWN_MS = 60_000;
 
+/**
+ * Sends back an error message with the right status code.
+ */
 const fail = (status: number, error: string) =>
   NextResponse.json({ error }, { status });
 
+/**
+ * Builds and saves a new taste profile for you, or explains why it couldn't.
+ */
 export async function POST() {
   const session = await requireUserOr401();
   if (session instanceof NextResponse) return session;

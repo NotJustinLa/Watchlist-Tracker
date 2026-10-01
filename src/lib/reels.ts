@@ -1,3 +1,7 @@
+/**
+ * Where the films in Reels come from. Server only.
+ */
+
 import 'server-only';
 import { createClient } from './supabase/server';
 import {
@@ -14,9 +18,11 @@ export type ReelItem = ReelFilm & { reason: string };
 export const REEL_PAGES = 30;
 
 /**
- * One batch of the Reels feed. Batch 0 leads with the AI taste picks; every batch
- * then takes TMDB recommendations for one of the films you rated 4–5 stars (cycling
- * through them), or trending films if you haven't rated any that highly.
+ * One batch of films for the Reels deck.
+ *
+ * The first batch starts with your AI picks. Every batch then adds TMDB
+ * recommendations for one of the films you rated 4 or 5 stars (taking turns
+ * between them), or trending films if you haven't rated anything that highly.
  * Films you've watched or saved, and films without a poster, are left out.
  */
 export async function getReelBatch(page: number): Promise<ReelItem[]> {

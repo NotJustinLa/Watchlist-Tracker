@@ -1,3 +1,7 @@
+/**
+ * The Follow button you see on Discover and on profiles.
+ */
+
 'use client';
 
 import { useState, useTransition } from 'react';
@@ -14,8 +18,11 @@ type FollowButtonProps = {
 };
 
 /**
- * Follow / Request to follow → Following / Requested; tap again to undo.
- * Unfollowing a private account asks to confirm, since re-following needs approval.
+ * Follow or Request to follow, then Following or Requested; tap again to undo.
+ *
+ * It updates instantly and then settles on what the server says. Unfollowing a
+ * private account asks you to confirm, because getting back in needs their
+ * approval.
  */
 export function FollowButton({
   handle,

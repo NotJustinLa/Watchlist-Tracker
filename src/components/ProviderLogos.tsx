@@ -1,5 +1,14 @@
-// Official brand marks. Google requires its full-colour G; GitHub and Discord use currentColor.
+/**
+ * Google, GitHub and Discord logos for the sign-in buttons.
+ *
+ * These are the official brand marks. Google asks for its full-colour G; GitHub
+ * and Discord use the button's text colour so they darken when the button turns
+ * yellow.
+ */
 
+/**
+ * The full-colour Google G.
+ */
 export function GoogleLogo() {
   return (
     <svg viewBox="0 0 48 48" width={20} height={20} aria-hidden>
@@ -23,6 +32,9 @@ export function GoogleLogo() {
   );
 }
 
+/**
+ * The GitHub mark.
+ */
 export function GitHubLogo() {
   return (
     <svg
@@ -37,6 +49,9 @@ export function GitHubLogo() {
   );
 }
 
+/**
+ * The Discord mark.
+ */
 export function DiscordLogo() {
   return (
     <svg

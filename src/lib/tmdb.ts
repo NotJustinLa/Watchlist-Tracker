@@ -1,3 +1,11 @@
+/**
+ * Everything that talks to TMDB, the movie database. Server only.
+ *
+ * This is the only file that knows TMDB's shapes and URLs. It turns TMDB's
+ * answers into the app's own simple film types, so no other file has to care.
+ * Answers are cached for an hour.
+ */
+
 import 'server-only';
 
 const API_URL = 'https://api.themoviedb.org/3';
@@ -54,6 +62,10 @@ class TmdbError extends Error {
   }
 }
 
+/**
+ * Calls TMDB with the server's token and returns the JSON, or throws with the
+ * status if TMDB says no.
+ */
 async function tmdbFetch<T>(
   path: string,
   params: Record<string, string> = {},
@@ -68,12 +80,21 @@ async function tmdbFetch<T>(
   return res.json() as Promise<T>;
 }
 
+/**
+ * Builds a full image address for a TMDB image path at a given size.
+ */
 const imageUrl = (size: string, path: string | null) =>
   path ? `${IMAGE_URL}/${size}${path}` : null;
 
-/** Grid-size poster URL for a stored `movies.poster_path`. */
+/**
+ * Turns a stored poster path into a grid-sized poster address.
+ */
 export const posterUrl = (path: string | null) => imageUrl('w342', path);
 
+/**
+ * Converts a TMDB film into the app's small film shape (id, title, year,
+ * poster).
+ */
 function toMovie(m: TmdbMovie, posterSize = 'w342'): Movie {
   return {
     id: m.id,
@@ -83,11 +104,17 @@ function toMovie(m: TmdbMovie, posterSize = 'w342'): Movie {
   };
 }
 
+/**
+ * Films that are popular on TMDB right now.
+ */
 export async function getPopular(): Promise<Movie[]> {
   const data = await tmdbFetch<{ results: TmdbMovie[] }>('/movie/popular');
   return data.results.map((m) => toMovie(m));
 }
 
+/**
+ * Films whose title matches what you typed, with adult titles left out.
+ */
 export async function searchMovies(query: string): Promise<Movie[]> {
   const data = await tmdbFetch<{ results: TmdbMovie[] }>('/search/movie', {
     query,
@@ -96,6 +123,9 @@ export async function searchMovies(query: string): Promise<Movie[]> {
   return data.results.map((m) => toMovie(m));
 }
 
+/**
+ * The full TMDB record for one film, or null if it doesn't exist.
+ */
 async function fetchMovieDetail(id: number): Promise<TmdbMovieDetail | null> {
   try {
     return await tmdbFetch<TmdbMovieDetail>(`/movie/${id}`);
@@ -105,6 +135,10 @@ async function fetchMovieDetail(id: number): Promise<TmdbMovieDetail | null> {
   }
 }
 
+/**
+ * Everything the movie page needs about one film, or null if there's no such
+ * film.
+ */
 export async function getMovie(id: number): Promise<MovieDetail | null> {
   const m = await fetchMovieDetail(id);
   if (!m) return null;
@@ -117,7 +151,10 @@ export async function getMovie(id: number): Promise<MovieDetail | null> {
   };
 }
 
-// What the `movies` table stores: built from TMDB on the server, never from client data.
+/**
+ * The small copy of a film the database keeps (title, poster, year, genres).
+ * Always built here from TMDB, never from your browser.
+ */
 export async function getMovieSnapshot(
   id: number,
 ): Promise<MovieSnapshot | null> {
@@ -132,6 +169,9 @@ export async function getMovieSnapshot(
   };
 }
 
+/**
+ * TMDB's list of genre names, so cards can say "Drama" instead of a number.
+ */
 async function genreNames(): Promise<Map<number, string>> {
   const data = await tmdbFetch<{ genres: { id: number; name: string }[] }>(
     '/genre/movie/list',
@@ -139,6 +179,10 @@ async function genreNames(): Promise<Map<number, string>> {
   return new Map(data.genres.map((g) => [g.id, g.name]));
 }
 
+/**
+ * Converts a TMDB list into Reels cards, adding genre names and dropping adult
+ * titles.
+ */
 async function toReelFilms(results: TmdbListMovie[]): Promise<ReelFilm[]> {
   const names = await genreNames();
   return results
@@ -150,7 +194,9 @@ async function toReelFilms(results: TmdbListMovie[]): Promise<ReelFilm[]> {
     }));
 }
 
-/** TMDB's "if you liked this" list for a film. */
+/**
+ * TMDB's "if you liked this" list for a film.
+ */
 export async function getRecommendations(id: number, page: number) {
   const data = await tmdbFetch<{ results: TmdbListMovie[] }>(
     `/movie/${id}/recommendations`,
@@ -159,6 +205,9 @@ export async function getRecommendations(id: number, page: number) {
   return toReelFilms(data.results);
 }
 
+/**
+ * Films trending on TMDB this week.
+ */
 export async function getTrending(page: number) {
   const data = await tmdbFetch<{ results: TmdbListMovie[] }>(
     '/trending/movie/week',

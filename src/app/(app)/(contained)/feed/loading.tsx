@@ -1,5 +1,12 @@
+/**
+ * Loading state for the Feed.
+ */
+
 import { Skeleton } from '@/components/Skeleton';
 
+/**
+ * Placeholder activity rows with avatars and poster thumbnails.
+ */
 export default function Loading() {
   return (
     <div

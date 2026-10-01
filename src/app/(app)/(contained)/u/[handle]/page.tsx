@@ -1,3 +1,13 @@
+/**
+ * Profile page (`/u/<handle>`).
+ *
+ * Anyone's profile, including yours: their avatar, name, follower counts, stats
+ * (films watched, average rating, a chart of their ratings) and their Watched
+ * and Watchlist tabs. If the account is private and you're not an approved
+ * follower, you only see a lock and a Request to follow button; their films
+ * never reach you.
+ */
+
 import { notFound } from 'next/navigation';
 import { Bookmark, Eye, Inbox, Lock, Settings } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
@@ -13,6 +23,9 @@ import { createClient } from '@/lib/supabase/server';
 import { posterUrl } from '@/lib/tmdb';
 import { handleSchema, profileTabSchema } from '@/lib/validation';
 
+/**
+ * Loads the profile and decides whether to show everything or the private lock.
+ */
 export default async function ProfilePage({
   params,
   searchParams,
@@ -127,6 +140,9 @@ export default async function ProfilePage({
   );
 }
 
+/**
+ * Your own Requests (with how many are waiting) and Settings buttons.
+ */
 async function OwnActions() {
   // RLS returns only your own profile; its id stays on the server.
   const supabase = await createClient();
@@ -147,6 +163,10 @@ async function OwnActions() {
   );
 }
 
+/**
+ * The poster grid for the Watched or Watchlist tab, with their star ratings on
+ * the Watched tab.
+ */
 async function Films({
   handle,
   tab,

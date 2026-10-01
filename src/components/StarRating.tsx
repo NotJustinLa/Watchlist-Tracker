@@ -1,3 +1,7 @@
+/**
+ * Star ratings, for showing and for choosing.
+ */
+
 'use client';
 
 import { useId, useState } from 'react';
@@ -15,6 +19,10 @@ const words = [
   'Loved it',
 ];
 
+/**
+ * One star, filled yellow when it's part of the rating and outlined when it
+ * isn't.
+ */
 function StarIcon({ filled, size }: { filled: boolean; size: number }) {
   return (
     <Star
@@ -34,6 +42,12 @@ type StarRatingProps = {
   compact?: boolean;
 };
 
+/**
+ * Shows a rating, or lets you pick one when you pass onChange.
+ *
+ * You can tap a star, use the arrow keys, or tap your current star again to
+ * clear it. The compact version is small enough to sit under a poster.
+ */
 export function StarRating({
   value,
   onChange,
