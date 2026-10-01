@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { BackButton } from '@/components/BackButton';
 import { Poster } from '@/components/PosterCard';
 import type { Rating } from '@/components/StarRating';
-import { createClient } from '@/lib/supabase/server';
+import { getMyFilmStates } from '@/lib/my-films';
 import { getMovie } from '@/lib/tmdb';
 import { tmdbIdParamSchema } from '@/lib/validation';
 import { MovieActions } from './MovieActions';
@@ -12,24 +12,11 @@ export default async function MoviePage({ params }: PageProps<'/movie/[id]'>) {
   const id = tmdbIdParamSchema.safeParse((await params).id);
   if (!id.success) notFound();
 
-  // RLS limits both queries to the signed-in user's own rows.
-  const supabase = await createClient();
-  const [movie, watched, watchlisted] = await Promise.all([
+  const [movie, mine] = await Promise.all([
     getMovie(id.data),
-    supabase
-      .from('watched')
-      .select('rating')
-      .eq('tmdb_id', id.data)
-      .maybeSingle(),
-    supabase
-      .from('watchlist_items')
-      .select('tmdb_id')
-      .eq('tmdb_id', id.data)
-      .maybeSingle(),
+    getMyFilmStates([id.data]),
   ]);
   if (!movie) notFound();
-  if (watched.error) throw watched.error;
-  if (watchlisted.error) throw watchlisted.error;
 
   const meta = [movie.year, movie.runtime && `${movie.runtime} min`]
     .filter(Boolean)
@@ -87,8 +74,8 @@ export default async function MoviePage({ params }: PageProps<'/movie/[id]'>) {
         <div className="md:order-2">
           <MovieActions
             tmdbId={movie.id}
-            rating={(watched.data?.rating ?? 0) as Rating}
-            onWatchlist={watchlisted.data !== null}
+            rating={(mine.ratings.get(movie.id) ?? 0) as Rating}
+            onWatchlist={mine.watchlist.has(movie.id)}
           />
         </div>
         <section className="flex max-w-prose flex-col gap-3">

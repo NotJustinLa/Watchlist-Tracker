@@ -6,14 +6,14 @@ import { tasteResponseSchema } from './validation';
 /** Fewer ratings than this and there's no pattern worth summarising. */
 export const MIN_RATINGS = 5;
 
-export type RatedFilm = {
+type RatedFilm = {
   title: string;
   year: number | null;
   genres: string[];
   rating: number;
 };
 
-export type TasteResponse = z.infer<typeof tasteResponseSchema>;
+type TasteResponse = z.infer<typeof tasteResponseSchema>;
 
 // Retries transient failures (e.g. 503 "high demand") with a short backoff.
 const ai = new GoogleGenAI({

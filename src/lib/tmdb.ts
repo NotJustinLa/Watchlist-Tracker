@@ -10,14 +10,14 @@ export type Movie = {
   posterUrl: string | null;
 };
 
-export type MovieDetail = Movie & {
+type MovieDetail = Movie & {
   backdropUrl: string | null;
   runtime: number | null;
   genres: string[];
   overview: string;
 };
 
-export type MovieSnapshot = {
+type MovieSnapshot = {
   tmdbId: number;
   title: string;
   posterPath: string | null;
@@ -39,7 +39,7 @@ type TmdbMovieDetail = TmdbMovie & {
   overview: string;
 };
 
-export class TmdbError extends Error {
+class TmdbError extends Error {
   constructor(readonly status: number) {
     super(`TMDB request failed with status ${status}`);
   }

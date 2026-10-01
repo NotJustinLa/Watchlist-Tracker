@@ -21,8 +21,24 @@ async function saveMovieSnapshot(tmdbId: number) {
   if (error) throw error;
 }
 
+type Session = Awaited<ReturnType<typeof requireUser>>;
+
+async function deleteOwnRow(
+  { user, supabase }: Session,
+  table: 'watched' | 'watchlist_items',
+  tmdbId: number,
+) {
+  const { error } = await supabase
+    .from(table)
+    .delete()
+    .eq('user_id', user.id)
+    .eq('tmdb_id', tmdbId);
+  if (error) throw error;
+}
+
 export async function setOnWatchlist(tmdbId: number, onWatchlist: boolean) {
-  const { user, supabase } = await requireUser();
+  const session = await requireUser();
+  const { user, supabase } = session;
   const id = tmdbIdSchema.parse(tmdbId);
   const on = z.boolean().parse(onWatchlist);
 
@@ -33,12 +49,7 @@ export async function setOnWatchlist(tmdbId: number, onWatchlist: boolean) {
       .upsert({ user_id: user.id, tmdb_id: id }, { ignoreDuplicates: true });
     if (error) throw error;
   } else {
-    const { error } = await supabase
-      .from('watchlist_items')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('tmdb_id', id);
-    if (error) throw error;
+    await deleteOwnRow(session, 'watchlist_items', id);
   }
   revalidatePath('/', 'layout');
 }
@@ -46,7 +57,8 @@ export async function setOnWatchlist(tmdbId: number, onWatchlist: boolean) {
 // Rating marks the film watched and takes it off the watchlist.
 // Re-rating keeps the original watched_at.
 export async function rateMovie(tmdbId: number, rating: number) {
-  const { user, supabase } = await requireUser();
+  const session = await requireUser();
+  const { user, supabase } = session;
   const id = tmdbIdSchema.parse(tmdbId);
   const stars = ratingSchema.parse(rating);
 
@@ -56,24 +68,14 @@ export async function rateMovie(tmdbId: number, rating: number) {
     .upsert({ user_id: user.id, tmdb_id: id, rating: stars });
   if (error) throw error;
 
-  const { error: watchlistError } = await supabase
-    .from('watchlist_items')
-    .delete()
-    .eq('user_id', user.id)
-    .eq('tmdb_id', id);
-  if (watchlistError) throw watchlistError;
+  await deleteOwnRow(session, 'watchlist_items', id);
   revalidatePath('/', 'layout');
 }
 
 export async function removeRating(tmdbId: number) {
-  const { user, supabase } = await requireUser();
+  const session = await requireUser();
   const id = tmdbIdSchema.parse(tmdbId);
 
-  const { error } = await supabase
-    .from('watched')
-    .delete()
-    .eq('user_id', user.id)
-    .eq('tmdb_id', id);
-  if (error) throw error;
+  await deleteOwnRow(session, 'watched', id);
   revalidatePath('/', 'layout');
 }
