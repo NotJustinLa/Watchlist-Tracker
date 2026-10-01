@@ -241,6 +241,20 @@ export type Database = {
         Args: { target_handle: string };
         Returns: Database['public']['Enums']['follow_status'];
       };
+      get_feed: {
+        Args: { before?: string; page_size?: number };
+        Returns: {
+          at: string;
+          avatar_url: string;
+          display_name: string;
+          handle: string;
+          kind: string;
+          poster_path: string;
+          rating: number;
+          title: string;
+          tmdb_id: number;
+        }[];
+      };
       get_follow_requests: {
         Args: never;
         Returns: {
