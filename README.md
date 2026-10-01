@@ -7,6 +7,7 @@ Built with Next.js (App Router), TypeScript, Tailwind, Supabase (Auth, Postgres,
 ## Features
 
 - **Sign in** with Google, GitHub or Discord (OAuth only, no passwords).
+- **Settings** to change your display name and handle (with a live availability check) and make your profile private.
 - **Search** TMDB as you type, or browse "Popular right now". Posters show your rating and watchlist status.
 - **Movie pages** with backdrop, poster, runtime, genres and overview, plus **Add to watchlist** and **Mark as watched**.
 - **Watchlist** sorted by date added or title, with remove on each poster.
@@ -96,6 +97,7 @@ supabase/migrations/             Schema, RLS and the profile trigger
 **Data**
 - A minimal `movies` snapshot (title, poster path, year, genres) is stored when a user first saves or rates a film, so lists and the AI prompt don't need a TMDB call per film. It is a display snapshot, not a TMDB mirror.
 - Profiles are created by a database trigger on sign-up. Handles are slugified from the OAuth name (fallback `user`), up to 16 characters, with a numeric suffix on collision.
+- Handles can be changed in Settings. Availability is checked by `GET /api/handles/check?h=` through a `handle_available()` database function that only answers yes or no, because RLS hides other members' profiles. The unique constraint is the final guard: a save that loses a race gets "That handle is taken". Old `/u/<handle>` links 404 after a rename, and nothing else changes because everything keys on the user id.
 - `setOnWatchlist(tmdbId, on)` and `setWatched(tmdbId, on)` take the desired state rather than toggling, so a double tap or retry can't flip it the wrong way. `rateMovie(tmdbId, rating | null)` only updates a film already marked watched.
 - List sorts and filters live in the URL (`?sort=`, `?stars=1..5|unrated`); invalid values fall back to defaults. Sorting by rating puts unrated films last.
 - TMDB responses are cached for an hour. Images use TMDB sizes: `w342` in grids, `w500` for the detail poster, `w1280` for backdrops.
@@ -114,6 +116,7 @@ supabase/migrations/             Schema, RLS and the profile trigger
 - Standard pages share a centred container via the `(app)/(contained)` route group; the movie page sits outside it so its backdrop runs full width.
 - A faint dot pattern sits behind all content and glows yellow around the pointer on hover-capable devices, and the movie backdrop has letterbox bars. This is a deliberate exception to the design system's "no decoration" and "yellow only for controls, stars and the active tab" rules.
 - Films without a poster show a film icon on a raised 2:3 block.
+- Sign out lives in Settings, with a shortcut icon in the desktop top bar.
 
 **Next.js 16**
 - Session refresh and sign-in redirects live in `src/proxy.ts`, Next 16's replacement for `middleware.ts`.
@@ -121,7 +124,7 @@ supabase/migrations/             Schema, RLS and the profile trigger
 
 ## Known limitations
 
-- **Social features aren't built yet.** Public/private profiles, follows and follow requests, an activity feed and editable handles are planned. The Profile tab is a placeholder at `/u/me` with Sign out. The Feed tab has no page yet.
+- **Social features aren't built yet.** Public/private profiles, follows and follow requests, an activity feed and editable handles are planned. Your profile at `/u/<handle>` shows only your name, handle and a Settings link, and other members' profiles 404 until member profiles are built. The private setting is saved but has no effect until follows exist. The Feed tab has no page yet.
 - **Google's consent screen names the Supabase domain** (`<project-ref>.supabase.co`) rather than the app, because Supabase handles the OAuth exchange. Fixing this needs a Supabase custom domain (paid).
 - **Unknown movie ids return HTTP 200** with the 404 page and a `noindex` tag, because `loading.tsx` starts streaming before the id is checked. This is documented Next.js behaviour.
 - **Gemini availability**: generation depends on Google's model capacity. Retries cover short spikes; a sustained outage shows an error with "Try again", and the previous profile is kept.

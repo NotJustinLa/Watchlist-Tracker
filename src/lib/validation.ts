@@ -13,6 +13,23 @@ export const tmdbIdParamSchema = z
 
 export const ratingSchema = z.number().int().min(1).max(5);
 
+// Handles are stored lowercase; input is normalised before the format check.
+export const handleSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^[a-z0-9_]{3,20}$/, '3–20 characters: letters, numbers and _');
+
+export const settingsSchema = z.object({
+  handle: handleSchema,
+  displayName: z
+    .string()
+    .trim()
+    .min(1, 'Enter a name')
+    .max(50, 'At most 50 characters'),
+  isPrivate: z.enum(['true', 'false']).transform((v) => v === 'true'),
+});
+
 export const watchlistSortSchema = z.enum(['added', 'title']).catch('added');
 
 export const watchedSortSchema = z

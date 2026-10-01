@@ -200,6 +200,7 @@ export type Database = {
         Args: { meta: Json; user_id: string };
         Returns: undefined;
       };
+      handle_available: { Args: { candidate: string }; Returns: boolean };
     };
     Enums: {
       [_ in never]: never;

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireUser, UnauthorizedError } from '@/lib/auth';
+import { requireUserOr401 } from '@/lib/auth';
 import { generateTasteProfile, MIN_RATINGS } from '@/lib/gemini';
 import { searchMovies } from '@/lib/tmdb';
 
@@ -9,14 +9,9 @@ const fail = (status: number, error: string) =>
   NextResponse.json({ error }, { status });
 
 export async function POST() {
-  let auth;
-  try {
-    auth = await requireUser();
-  } catch (error) {
-    if (error instanceof UnauthorizedError) return fail(401, 'Sign in first.');
-    throw error;
-  }
-  const { user, supabase } = auth;
+  const session = await requireUserOr401();
+  if (session instanceof NextResponse) return session;
+  const { user, supabase } = session;
 
   // RLS limits both reads to the user's own rows.
   const [previous, watched] = await Promise.all([
