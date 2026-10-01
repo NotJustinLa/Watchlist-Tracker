@@ -9,6 +9,7 @@ Built with Next.js (App Router), TypeScript, Tailwind, Motion, Supabase (Auth, P
 - **Sign in** with Google, GitHub or Discord (OAuth only, no passwords).
 - **Settings** to change your display name and handle (with a live availability check) and make your profile private.
 - **Discover people** by name or @handle and follow them; private accounts get a follow request instead.
+- **Friends who watched**: posters show a small avatar stack of people you follow who watched the film, and movie pages list them with their ratings.
 - **Activity feed**: what people you follow watched (with their stars) and added to their watchlists, newest first, with Load more.
 - **Member profiles** at `/u/<handle>`: avatar, follower counts, stats (films watched, average rating, a 1–5 star distribution chart) and Watched / Watchlist tabs. Private profiles show only a lock and "Request to follow" until you're approved.
 - **Follow requests**: private accounts approve or decline followers on the Requests page; a badge on the Profile tab shows how many are waiting.
@@ -103,6 +104,7 @@ supabase/migrations/             Schema, RLS and the profile trigger
 - A minimal `movies` snapshot (title, poster path, year, genres) is stored when a user first saves or rates a film, so lists and the AI prompt don't need a TMDB call per film. It is a display snapshot, not a TMDB mirror.
 - Profiles are created by a database trigger on sign-up. Handles are slugified from the OAuth name (fallback `user`), up to 16 characters, with a numeric suffix on collision.
 - Handles can be changed in Settings. Availability is checked by `GET /api/handles/check?h=` through a `handle_available()` database function that only answers yes or no, because RLS hides other members' profiles. The unique constraint is the final guard: a save that loses a race gets "That handle is taken". Old `/u/<handle>` links 404 after a rename, and nothing else changes because everything keys on the user id.
+- "Friends who watched" comes from `friends_who_watched(tmdb_ids)`, which returns handle, name, avatar and rating for accepted follows only, for at most 60 films per call; each grid makes one call (longer lists are split into batches of 60). The avatar stack sits in the poster's top-left corner, not the design's bottom-right, so it can't collide with your star rating on narrow phone posters.
 - The feed comes from `get_feed(before, page_size)`, which combines your accepted follows' `watched` and `watchlist_items` rows (no separate events table, so it can't drift out of sync). Unmarking a watched film or removing it from a watchlist removes the event; changing a rating updates the stars but keeps the original time. Pages of 20 use the last event's time as the cursor (`GET /api/feed?before=`). Pending follow requests show nothing.
 - Profiles come from `get_profile`, `get_member_watched` and `get_member_watchlist`, security-definer functions that take a handle and never return user ids. Stats and films are returned only if `can_view()` passes, so a private profile's films never reach the browser of someone who isn't approved. Your own profile uses the same functions. The average counts rated films only; "watched" counts every watched film. Rating bars are grey with the tallest in white (data, not a rating, so no yellow). Other members' profiles highlight the Feed tab, since you reach them from Discover.
 - Member search (`/discover?q=`) works like film search: the query lives in the URL and the server renders results. A `search_members()` database function returns handle, name, avatar, privacy and your relationship to each match (no ids), matching handle or name case-insensitively with LIKE wildcards escaped. Unfollowing a private account asks to confirm inline, since re-following needs approval again.
@@ -138,7 +140,6 @@ supabase/migrations/             Schema, RLS and the profile trigger
 
 ## Known limitations
 
-- **"Friends who watched this"** on movie pages isn't built yet; everything else in the social layer is. 
 - **Google's consent screen names the Supabase domain** (`<project-ref>.supabase.co`) rather than the app, because Supabase handles the OAuth exchange. Fixing this needs a Supabase custom domain (paid).
 - **Unknown movie ids return HTTP 200** with the 404 page and a `noindex` tag, because `loading.tsx` starts streaming before the id is checked. This is documented Next.js behaviour.
 - **Gemini availability**: generation depends on Google's model capacity. Retries cover short spikes; a sustained outage shows an error with "Try again", and the previous profile is kept.

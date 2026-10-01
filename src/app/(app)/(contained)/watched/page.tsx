@@ -5,6 +5,7 @@ import { PosterCard } from '@/components/PosterCard';
 import { PosterGrid } from '@/components/PosterGrid';
 import { Segmented } from '@/components/Segmented';
 import type { Rating } from '@/components/StarRating';
+import { getFriendsWhoWatched } from '@/lib/friends';
 import { createClient } from '@/lib/supabase/server';
 import { posterUrl } from '@/lib/tmdb';
 import { watchedFilterSchema, watchedSortSchema } from '@/lib/validation';
@@ -47,6 +48,10 @@ export default async function WatchedPage({
   if (sort === 'title') {
     films.sort((a, b) => a.movies.title.localeCompare(b.movies.title));
   }
+
+  const friends = await getFriendsWhoWatched(
+    films.map(({ movies }) => movies.tmdb_id),
+  );
 
   return (
     <>
@@ -122,6 +127,7 @@ export default async function WatchedPage({
               year={film.release_year}
               posterUrl={posterUrl(film.poster_path)}
               href={`/movie/${film.tmdb_id}`}
+              friends={friends.get(film.tmdb_id)}
               footer={
                 <RateFilm
                   tmdbId={film.tmdb_id}

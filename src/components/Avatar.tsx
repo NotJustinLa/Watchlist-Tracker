@@ -1,6 +1,6 @@
 import Image from 'next/image';
 
-const sizes = { md: 40, lg: 88 };
+const sizes = { xs: 20, md: 40, lg: 88 };
 
 function initials(name: string) {
   return name

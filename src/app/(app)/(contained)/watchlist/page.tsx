@@ -4,6 +4,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { PosterCard } from '@/components/PosterCard';
 import { PosterGrid } from '@/components/PosterGrid';
 import { Segmented } from '@/components/Segmented';
+import { getFriendsWhoWatched } from '@/lib/friends';
 import { createClient } from '@/lib/supabase/server';
 import { posterUrl } from '@/lib/tmdb';
 import { watchlistSortSchema } from '@/lib/validation';
@@ -24,6 +25,7 @@ export default async function WatchlistPage({
 
   const films = data.map((row) => row.movies);
   if (sort === 'title') films.sort((a, b) => a.title.localeCompare(b.title));
+  const friends = await getFriendsWhoWatched(films.map((film) => film.tmdb_id));
 
   return (
     <>
@@ -71,6 +73,7 @@ export default async function WatchlistPage({
               year={film.release_year}
               posterUrl={posterUrl(film.poster_path)}
               href={`/movie/${film.tmdb_id}`}
+              friends={friends.get(film.tmdb_id)}
               action={<RemoveButton tmdbId={film.tmdb_id} title={film.title} />}
             />
           ))}

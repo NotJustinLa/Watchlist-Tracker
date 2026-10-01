@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { BookmarkCheck, Film, Star } from 'lucide-react';
+import { Avatar } from './Avatar';
 
 type PosterProps = {
   url: string | null;
@@ -43,6 +44,8 @@ type PosterCardProps = {
   /** Your rating (1–5), shown as filled stars on the poster. */
   rating?: number;
   watchlisted?: boolean;
+  /** People you follow who watched this film. */
+  friends?: { handle: string; displayName: string; avatarUrl: string | null }[];
   /** A control over the poster's top-right corner (e.g. remove), kept outside the link. */
   action?: ReactNode;
   /** Content under the title (e.g. a rating input), kept outside the link. */
@@ -56,6 +59,7 @@ export function PosterCard({
   href,
   rating,
   watchlisted,
+  friends = [],
   action,
   footer,
 }: PosterCardProps) {
@@ -83,6 +87,30 @@ export function PosterCard({
               <span className="sr-only">{`Your rating: ${rating} out of 5`}</span>
             </span>
           ) : null}
+          {friends.length > 0 && (
+            <span className="absolute top-1.5 left-1.5 flex items-center rounded-full bg-scrim p-0.5 backdrop-blur-sm">
+              {friends.slice(0, 3).map((friend, i) => (
+                <span
+                  key={friend.handle}
+                  className={`rounded-full ring-2 ring-scrim ${i ? '-ml-1.5' : ''}`}
+                >
+                  <Avatar
+                    name={friend.displayName}
+                    url={friend.avatarUrl}
+                    size="xs"
+                  />
+                </span>
+              ))}
+              {friends.length > 3 && (
+                <span aria-hidden className="px-1 text-[10px] font-extrabold">
+                  +{friends.length - 3}
+                </span>
+              )}
+              <span className="sr-only">
+                {`${friends.length} ${friends.length === 1 ? 'person' : 'people'} you follow watched this`}
+              </span>
+            </span>
+          )}
           {watchlisted && !action && (
             <span className="absolute top-1.5 right-1.5 flex size-7 items-center justify-center rounded-full bg-scrim backdrop-blur-sm">
               <BookmarkCheck size={15} aria-hidden />

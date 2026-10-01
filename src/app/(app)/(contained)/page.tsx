@@ -5,6 +5,7 @@ import { PosterCard } from '@/components/PosterCard';
 import { PosterGrid } from '@/components/PosterGrid';
 import { SearchInput } from '@/components/SearchInput';
 import { PosterGridSkeleton } from '@/components/Skeleton';
+import { getFriendsWhoWatched } from '@/lib/friends';
 import { getMyFilmStates } from '@/lib/my-films';
 import { getPopular, searchMovies } from '@/lib/tmdb';
 import { searchQuerySchema } from '@/lib/validation';
@@ -27,7 +28,11 @@ export default async function SearchPage({ searchParams }: PageProps<'/'>) {
 
 async function Results({ query }: { query: string }) {
   const movies = query ? await searchMovies(query) : await getPopular();
-  const mine = await getMyFilmStates(movies.map((movie) => movie.id));
+  const ids = movies.map((movie) => movie.id);
+  const [mine, friends] = await Promise.all([
+    getMyFilmStates(ids),
+    getFriendsWhoWatched(ids),
+  ]);
 
   if (query && movies.length === 0) {
     return (
@@ -61,6 +66,7 @@ async function Results({ query }: { query: string }) {
             href={`/movie/${movie.id}`}
             rating={mine.watched.get(movie.id) ?? undefined}
             watchlisted={mine.watchlist.has(movie.id)}
+            friends={friends.get(movie.id)}
           />
         ))}
       </PosterGrid>

@@ -1,8 +1,12 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { Users } from 'lucide-react';
 import { BackButton } from '@/components/BackButton';
+import { EmptyState } from '@/components/EmptyState';
 import { Poster } from '@/components/PosterCard';
-import type { Rating } from '@/components/StarRating';
+import { StarRating, type Rating } from '@/components/StarRating';
+import { UserChip } from '@/components/UserChip';
+import { getFriendsWhoWatched } from '@/lib/friends';
 import { getMyFilmStates } from '@/lib/my-films';
 import { getMovie } from '@/lib/tmdb';
 import { tmdbIdParamSchema } from '@/lib/validation';
@@ -12,10 +16,12 @@ export default async function MoviePage({ params }: PageProps<'/movie/[id]'>) {
   const id = tmdbIdParamSchema.safeParse((await params).id);
   if (!id.success) notFound();
 
-  const [movie, mine] = await Promise.all([
+  const [movie, mine, friendsByFilm] = await Promise.all([
     getMovie(id.data),
     getMyFilmStates([id.data]),
+    getFriendsWhoWatched([id.data]),
   ]);
+  const friends = friendsByFilm.get(id.data) ?? [];
   if (!movie) notFound();
 
   const meta = [movie.year, movie.runtime && `${movie.runtime} min`]
@@ -79,10 +85,42 @@ export default async function MoviePage({ params }: PageProps<'/movie/[id]'>) {
             onWatchlist={mine.watchlist.has(movie.id)}
           />
         </div>
-        <section className="flex max-w-prose flex-col gap-3">
-          <h2 className="text-overline text-muted uppercase">Overview</h2>
-          <p>{movie.overview || 'No overview available.'}</p>
-        </section>
+        <div className="flex max-w-prose flex-col gap-8">
+          <section className="flex flex-col gap-3">
+            <h2 className="text-overline text-muted uppercase">Overview</h2>
+            <p>{movie.overview || 'No overview available.'}</p>
+          </section>
+          <section className="flex flex-col gap-1">
+            <h2 className="text-overline text-muted uppercase">
+              Friends who watched this · {friends.length}
+            </h2>
+            {friends.length === 0 ? (
+              <EmptyState
+                icon={Users}
+                title="None of your friends yet"
+                body="Be the first of your circle to log it."
+              />
+            ) : (
+              <ul>
+                {friends.map((friend) => (
+                  <li
+                    key={friend.handle}
+                    className="flex items-center gap-3 border-b border-line py-3 last:border-b-0"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <UserChip person={friend} />
+                    </div>
+                    {friend.rating ? (
+                      <StarRating value={friend.rating as Rating} />
+                    ) : (
+                      <span className="text-body-sm text-muted">Not rated</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
       </div>
     </article>
   );
