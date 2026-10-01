@@ -1,5 +1,9 @@
 # Reel
 
+Name: Justin
+Email: notjustinla@gmail.com
+link to the deployed project: https://watchlist-tracker-seven.vercel.app/
+
 A movie watchlist and rating tracker with an AI taste profile. Search films, save them to a watchlist, mark what you've watched and rate it, and get a short read on your taste with recommendations grounded in real films.
 
 Built with Next.js (App Router), TypeScript, Tailwind, Motion, Supabase (Auth, Postgres, RLS), TMDB and Gemini. Deployed on Vercel.
@@ -19,6 +23,27 @@ Built with Next.js (App Router), TypeScript, Tailwind, Motion, Supabase (Auth, P
 - **Watchlist** sorted by date added or title, with remove on each poster.
 - **Watched** list (its own tab) where you rate each film with 1–5 stars under its poster. Sort by recent, rating or title; filter by star count or show only unrated films.
 - **Taste profile**: once you've rated 5 films, Gemini writes a one-to-two sentence summary of your taste and recommends 3–5 films you haven't seen, each with a reason that names a film you rated.
+
+## Try the social features
+
+The deployed app has four demo members you can follow. They're display-only (no one can sign in as them), so their activity is already in place:
+
+| Handle                     | Profile     | Taste                                                                       |
+| -------------------------- | ----------- | --------------------------------------------------------------------------- |
+| `@maya_demo` (Maya Chen)   | public      | quiet dramas: Past Lives, Aftersun, In the Mood for Love ★5; Fast X ★1      |
+| `@sam_demo` (Sam Okafor)   | public      | sci-fi and action: Dune: Part Two, Blade Runner 2049, Mad Max: Fury Road ★5 |
+| `@priya_demo` (Priya Nair) | public      | a mix: Parasite, Spirited Away ★5; one film watched but not yet rated       |
+| `@ren_demo` (Ren Ito)      | **private** | Portrait of a Lady on Fire, Burning ★5 (hidden until approved)              |
+
+To try them:
+
+1. Sign in, open **Feed → Discover people** and search `demo`.
+2. **Follow** Maya, Sam and Priya. Their watches and watchlist additions appear in **Feed**.
+3. Search **Past Lives**: its poster shows who you follow has watched it, and the film page lists them with their ratings under **Friends who watched this**.
+4. Open a demo member's profile for their stats, rating chart and Watched / Watchlist tabs.
+5. Open `@ren_demo`: the profile is locked. **Request to follow** sends a request (it stays **Requested**, since nobody can sign in as Ren to approve it).
+
+To try approving requests, sign in with a second account in another browser (use a provider with a different email; accounts that share an email are merged), make one account private in **Settings**, and request it from the other.
 
 ## Running locally
 
@@ -48,14 +73,14 @@ Other commands: `npm run build`, `npm run lint`, and after any migration
 
 ## Environment variables
 
-| Variable | Exposed to browser | Purpose |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anon key (safe to expose; RLS protects data) |
-| `SUPABASE_SERVICE_ROLE_KEY` | **No** | Bypasses RLS. Used only to write movie snapshots from server-side TMDB data |
-| `TMDB_READ_TOKEN` | **No** | TMDB v4 "API Read Access Token" |
-| `GEMINI_API_KEY` | **No** | Google AI Studio key |
-| `GEMINI_MODEL` | **No** | Gemini model id, e.g. a current Flash model |
+| Variable                        | Exposed to browser | Purpose                                                                     |
+| ------------------------------- | ------------------ | --------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Yes                | Supabase project URL                                                        |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes                | Supabase anon key (safe to expose; RLS protects data)                       |
+| `SUPABASE_SERVICE_ROLE_KEY`     | **No**             | Bypasses RLS. Used only to write movie snapshots from server-side TMDB data |
+| `TMDB_READ_TOKEN`               | **No**             | TMDB v4 "API Read Access Token"                                             |
+| `GEMINI_API_KEY`                | **No**             | Google AI Studio key                                                        |
+| `GEMINI_MODEL`                  | **No**             | Gemini model id, e.g. a current Flash model                                 |
 
 On Vercel, mark the three server-only values as secrets. A scan of the production build confirms none of them appear in browser code.
 
@@ -94,6 +119,7 @@ supabase/migrations/             Schema, RLS and the profile trigger
 ## Decisions
 
 **Product**
+
 - Movies only, via TMDB. Ratings are 1–5 whole stars.
 - Watching and rating are separate steps: **Mark as watched** on a film's page adds it to Watched, and you rate it from the Watched page. A rating is optional, and only rated films count towards the taste profile.
 - Marking a film watched removes it from the watchlist; a watched film can be added back to rewatch. Unmarking a film removes it from Watched along with its rating.
@@ -101,6 +127,7 @@ supabase/migrations/             Schema, RLS and the profile trigger
 - Search is the home page (`/`). The nav has seven tabs: Search, Reels, Feed, Watchlist, Watched, Taste, Profile.
 
 **Data**
+
 - A minimal `movies` snapshot (title, poster path, year, genres) is stored when a user first saves or rates a film, so lists and the AI prompt don't need a TMDB call per film. It is a display snapshot, not a TMDB mirror.
 - Profiles are created by a database trigger on sign-up. Handles are slugified from the OAuth name (fallback `user`), up to 16 characters, with a numeric suffix on collision.
 - Handles can be changed in Settings. Availability is checked by `GET /api/handles/check?h=` through a `handle_available()` database function that only answers yes or no, because RLS hides other members' profiles. The unique constraint is the final guard: a save that loses a race gets "That handle is taken". Old `/u/<handle>` links 404 after a rename, and nothing else changes because everything keys on the user id.
@@ -115,6 +142,7 @@ supabase/migrations/             Schema, RLS and the profile trigger
 - TMDB responses are cached for an hour. Images use TMDB sizes: `w342` in grids, `w500` for the detail poster, `w1280` for backdrops.
 
 **AI taste profile**
+
 - Generated only on request (`POST /api/taste`), stored in `taste_profiles` with the rating count it used, and shown from storage afterwards. The page notes when you've rated more films since.
 - Needs at least 5 rated films (watched-but-unrated films don't count). Regenerating is limited to once a minute per user to protect the API key.
 - Gemini returns JSON against a response schema derived from the same zod schema that validates it. Transient errors (such as 503 "high demand") are retried up to 3 times within a 30-second timeout.
@@ -122,11 +150,13 @@ supabase/migrations/             Schema, RLS and the profile trigger
 - The loading state is a plain "Thinking about your ratings…" with skeletons rather than the design's timed step animation, so the UI never implies progress it can't measure.
 
 **Reels**
-- One card at a time, Hinge-style (no vertical scrolling): drag past 110px or flick to decide; otherwise the card springs back. The card tilts with the drag and a Save / Skip stamp fades in. Animation uses Motion (`motion/react`, the renamed Framer Motion) and respects reduced-motion settings.
+
+- One card at a time, (no vertical scrolling): drag past 110px or flick to decide; otherwise the card springs back. The card tilts with the drag and a Save / Skip stamp fades in. Animation uses Motion (`motion/react`, the renamed Framer Motion) and respects reduced-motion settings.
 - Films: your AI taste picks first (with their AI reasons), then TMDB recommendations for the films you rated 4–5 stars, cycling through them ("Because you loved Past Lives"); trending films if you haven't rated any that highly. Watched and saved films are excluded. Batches load from `GET /api/reels?page=` as you near the end.
 - Skips last for the visit only: skipped and already-shown films don't come back until you reload.
 
 **Interface**
+
 - Design tokens use the design system's names (`bg`, `surface`, `raised`, `line`, `ink`, `muted`, `accent`, ...); Tailwind's default palette is removed so only tokens can be used.
 - Manrope via `next/font`. Lucide icons only, no emoji; the sign-in buttons use the official Google (full colour), GitHub and Discord marks.
 - Mutations use optimistic UI (`useOptimistic`): the change shows instantly and reverts with an inline message if the server rejects it.
@@ -136,6 +166,7 @@ supabase/migrations/             Schema, RLS and the profile trigger
 - Sign out lives in Settings, with a shortcut icon in the desktop top bar.
 
 **Next.js 16**
+
 - Session refresh and sign-in redirects live in `src/proxy.ts`, Next 16's replacement for `middleware.ts`.
 - `error.tsx` files use Next 16's `retry()`, which re-fetches, rather than `reset()`.
 
