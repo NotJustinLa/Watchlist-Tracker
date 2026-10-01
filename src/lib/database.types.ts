@@ -39,6 +39,27 @@ export type Database = {
   };
   public: {
     Tables: {
+      follows: {
+        Row: {
+          created_at: string;
+          followee_id: string;
+          follower_id: string;
+          status: Database['public']['Enums']['follow_status'];
+        };
+        Insert: {
+          created_at?: string;
+          followee_id: string;
+          follower_id: string;
+          status: Database['public']['Enums']['follow_status'];
+        };
+        Update: {
+          created_at?: string;
+          followee_id?: string;
+          follower_id?: string;
+          status?: Database['public']['Enums']['follow_status'];
+        };
+        Relationships: [];
+      };
       movies: {
         Row: {
           genres: string[];
@@ -196,14 +217,36 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      can_view: { Args: { target: string }; Returns: boolean };
       create_profile: {
         Args: { meta: Json; user_id: string };
         Returns: undefined;
       };
+      follow_by_handle: {
+        Args: { target_handle: string };
+        Returns: Database['public']['Enums']['follow_status'];
+      };
+      get_follow_requests: {
+        Args: never;
+        Returns: {
+          avatar_url: string;
+          display_name: string;
+          handle: string;
+          requested_at: string;
+        }[];
+      };
       handle_available: { Args: { candidate: string }; Returns: boolean };
+      respond_to_request: {
+        Args: { approve: boolean; follower_handle: string };
+        Returns: undefined;
+      };
+      unfollow_by_handle: {
+        Args: { target_handle: string };
+        Returns: undefined;
+      };
     };
     Enums: {
-      [_ in never]: never;
+      follow_status: 'pending' | 'accepted';
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -330,7 +373,9 @@ export type CompositeTypes<
 
 export const Constants = {
   graphql_public: {
-    Enums: {},
+    Enums: {
+      follow_status: ['pending', 'accepted'],
+    },
   },
   public: {
     Enums: {},

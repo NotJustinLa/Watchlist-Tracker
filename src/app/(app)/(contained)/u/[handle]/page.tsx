@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
-import { Settings } from 'lucide-react';
+import { Inbox, Settings } from 'lucide-react';
 import { ButtonLink } from '@/components/Button';
+import { getPendingRequestCount } from '@/lib/follows';
 import { createClient } from '@/lib/supabase/server';
 import { handleSchema } from '@/lib/validation';
 
@@ -15,11 +16,12 @@ export default async function ProfilePage({
   const supabase = await createClient();
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('handle, display_name')
+    .select('id, handle, display_name')
     .eq('handle', handle.data)
     .maybeSingle();
   if (error) throw error;
   if (!profile) notFound();
+  const requests = await getPendingRequestCount(profile.id);
 
   return (
     <section className="flex flex-col items-start gap-4">
@@ -30,9 +32,17 @@ export default async function ProfilePage({
       <p className="text-body-sm text-muted">
         Your ratings and stats will appear here.
       </p>
-      <ButtonLink href="/settings" icon={Settings}>
-        Settings
-      </ButtonLink>
+      <div className="flex flex-wrap gap-2">
+        <ButtonLink href="/requests" icon={Inbox}>
+          Requests
+          {requests > 0 && (
+            <span className="text-muted">{requests > 9 ? '9+' : requests}</span>
+          )}
+        </ButtonLink>
+        <ButtonLink href="/settings" icon={Settings}>
+          Settings
+        </ButtonLink>
+      </div>
     </section>
   );
 }

@@ -19,7 +19,14 @@ function activeTab(pathname: string): NavId {
   return 'search';
 }
 
-export function AppNav({ profileHref }: { profileHref: string }) {
+export function AppNav({
+  profileHref,
+  requests,
+}: {
+  profileHref: string;
+  /** Pending follow requests, shown as a badge on Profile. */
+  requests: number;
+}) {
   const active = activeTab(usePathname());
   const items = [
     { id: 'search', label: 'Search', href: '/', icon: Search },
@@ -30,7 +37,7 @@ export function AppNav({ profileHref }: { profileHref: string }) {
     { id: 'profile', label: 'Profile', href: profileHref, icon: User },
   ] as const;
 
-  const links = (itemClass: string, iconSize: number) =>
+  const links = (itemClass: string, iconSize: number, badgeClass: string) =>
     items.map(({ id, label, href, icon: Icon }) => (
       <Link
         key={id}
@@ -40,6 +47,14 @@ export function AppNav({ profileHref }: { profileHref: string }) {
       >
         <Icon size={iconSize} aria-hidden />
         {label}
+        {id === 'profile' && requests > 0 && (
+          <span
+            className={`flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-badge px-1.25 text-[11px] leading-none font-extrabold text-on-accent ${badgeClass}`}
+          >
+            {requests > 9 ? '9+' : requests}
+            <span className="sr-only"> follow requests</span>
+          </span>
+        )}
       </Link>
     ));
 
@@ -53,7 +68,7 @@ export function AppNav({ profileHref }: { profileHref: string }) {
           Reel<span className="text-accent">.</span>
         </Link>
         <nav aria-label="Main" className="flex gap-1">
-          {links('h-10 gap-2 rounded-md px-3 text-label text-muted', 20)}
+          {links('h-10 gap-2 rounded-md px-3 text-label text-muted', 20, '')}
         </nav>
         <div className="ml-auto">
           <SignOutButton iconOnly />
@@ -66,6 +81,7 @@ export function AppNav({ profileHref }: { profileHref: string }) {
         {links(
           'min-w-11 flex-1 flex-col justify-center gap-0.75 text-[11px] leading-3.5 font-bold text-muted aria-[current=page]:before:absolute aria-[current=page]:before:inset-x-[28%] aria-[current=page]:before:top-0 aria-[current=page]:before:h-0.5 aria-[current=page]:before:rounded-b-xs aria-[current=page]:before:bg-accent',
           22,
+          'absolute top-2 left-[calc(50%+6px)]',
         )}
       </nav>
     </>
