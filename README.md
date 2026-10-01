@@ -38,3 +38,7 @@
 - Re-rating: Changing a rating keeps the original `watched_at`
 - List pages: Watchlist and Watched read the stored `movies` snapshots (no TMDB calls); sort and star filter live in the URL (`?sort=`, `?stars=`) and invalid values fall back to defaults
 - Watched page: Reached from the Profile tab (a link on the placeholder profile until the real profile exists)
+- AI model: Gemini via `GEMINI_MODEL` (currently `gemini-3.8-flash`, the newest stable Flash); responses use a JSON response schema and are re-validated with zod
+- Taste profile: Generated only on request (`POST /api/taste`), stored in `taste_profiles` with the rating count it used, and shown from storage on later visits; regenerating is limited to once a minute per user
+- Recommendations: Each AI pick is matched to a real TMDB film by title and year (±1); picks that don't match, repeat, or are already watched are dropped, and picks watched later are hidden
+- Taste loading: A plain "Thinking about your ratings…" state with skeletons, not the design's timed step animation, so the UI never implies progress it can't measure

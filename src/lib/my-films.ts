@@ -5,6 +5,9 @@ import { createClient } from './supabase/server';
  * in one query per table. RLS limits both to the user's own rows.
  */
 export async function getMyFilmStates(tmdbIds: number[]) {
+  if (tmdbIds.length === 0) {
+    return { ratings: new Map<number, number>(), watchlist: new Set<number>() };
+  }
   const supabase = await createClient();
   const [watched, watchlist] = await Promise.all([
     supabase.from('watched').select('tmdb_id, rating').in('tmdb_id', tmdbIds),
